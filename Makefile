@@ -1,14 +1,28 @@
+CXX = g++
+
 CXXFLAGS =	-O2 -g -Wall -fmessage-length=0
 
-OBJS =		Renderer.o
+OBJS =		Renderer.o SceneGraph.o SceneNode.o ShaderHelper.o
 
-LIBS =		-lSDL -lGL
+LIBS =		-lSDL -lGL 
 
 TARGET =	Renderer
 
 $(TARGET):	$(OBJS)
-	$(CXX) -o $(TARGET) $(OBJS) $(LIBS)
+	$(CXX) $(OBJS) $(LIBS) -o $(TARGET)
+	
+Renderer.o: Renderer.cpp
+	$(CXX) $(CXXFLAGS) -c Renderer.cpp
 
+SceneGraph.o: SceneGraph/SceneGraph.cpp
+	$(CXX) $(CXXFLAGS) -c SceneGraph/SceneGraph.cpp
+	
+SceneNode.o: SceneGraph/SceneNode.cpp
+	$(CXX) $(CXXFLAGS) -c SceneGraph/SceneNode.cpp
+	
+ShaderHelper.o: ShaderHelper/ShaderHelper.cpp
+	$(CXX) $(CXXFLAGS) -c ShaderHelper/ShaderHelper.cpp
+	
 all:	$(TARGET)
 
 clean:
