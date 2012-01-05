@@ -1,6 +1,6 @@
 CXX = g++
 
-CXXFLAGS =	-O2 -g -Wall -fmessage-length=0
+CXXFLAGS =	-DGL_GLEXT_PROTOTYPES -O2 -g -Wall -fmessage-length=0
 
 OBJS =		Renderer.o SceneGraph.o SceneNode.o ShaderHelper.o
 
