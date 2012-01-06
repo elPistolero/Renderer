@@ -1,28 +1,42 @@
 CXX = g++
 
+ODIR = Build/Objects
+
+BIN = Build/bin
+
 CXXFLAGS =	-DGL_GLEXT_PROTOTYPES -O2 -g -Wall -fmessage-length=0
 
-OBJS =		Renderer.o SceneGraph.o SceneNode.o ShaderHelper.o
+_OBJS =		Renderer.o SceneGraph.o SceneNode.o ShaderHelper.o
+
+OBJS = $(patsubst %,$(ODIR)/%,$(_OBJS))
 
 LIBS =		-lSDL -lGL 
 
-TARGET =	Renderer
+TARGET =	$(BIN)/Renderer
 
 $(TARGET):	$(OBJS)
 	$(CXX) $(OBJS) $(LIBS) -o $(TARGET)
 	
-Renderer.o: Renderer.cpp
-	$(CXX) $(CXXFLAGS) -c Renderer.cpp
+$(ODIR)/Renderer.o: Renderer.cpp
+	@mkdir -p $(ODIR)
+	@mkdir -p $(BIN)
+	$(CXX) $(CXXFLAGS) -c Renderer.cpp -o $@
 
-SceneGraph.o: SceneGraph/SceneGraph.cpp
-	$(CXX) $(CXXFLAGS) -c SceneGraph/SceneGraph.cpp
+$(ODIR)/SceneGraph.o: SceneGraph/SceneGraph.cpp
+	@mkdir -p $(ODIR)
+	@mkdir -p $(BIN)
+	$(CXX) $(CXXFLAGS) -c SceneGraph/SceneGraph.cpp -o $@
 	
-SceneNode.o: SceneGraph/SceneNode.cpp
-	$(CXX) $(CXXFLAGS) -c SceneGraph/SceneNode.cpp
+$(ODIR)/SceneNode.o: SceneGraph/SceneNode.cpp
+	@mkdir -p $(ODIR)
+	@mkdir -p $(BIN)
+	$(CXX) $(CXXFLAGS) -c SceneGraph/SceneNode.cpp -o $@
 	
-ShaderHelper.o: ShaderHelper/ShaderHelper.cpp
-	$(CXX) $(CXXFLAGS) -c ShaderHelper/ShaderHelper.cpp
-	
+$(ODIR)/ShaderHelper.o: ShaderHelper/ShaderHelper.cpp
+	@mkdir -p $(ODIR)
+	@mkdir -p $(BIN)
+	$(CXX) $(CXXFLAGS) -c ShaderHelper/ShaderHelper.cpp -o $@
+
 all:	$(TARGET)
 
 clean:
