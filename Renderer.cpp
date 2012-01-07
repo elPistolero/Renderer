@@ -36,7 +36,6 @@ GLint simpleShader = 0;
 GLuint squareVAO = 0;
 GLuint squareIBO = 0;
 GLuint squareVBO = 0;
-glm::mat4 modelview = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -5.0f));
 
 bool Renderer::initGL() {
 	m_projection = glm::perspective(90.0f, (float)WIDTH/(float)HEIGHT, 1.0f, 1000.0f);
@@ -79,8 +78,13 @@ void Renderer::quit() {
 	SDL_Quit();
 }
 
+float angle = 0.0f;
 void Renderer::drawScreen() {
 	glClear(GL_COLOR_BUFFER_BIT);
+
+	// rotate
+	glm::mat4 modelview = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -5.0f)) * glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f));
+	angle += 0.01;
 
 	glUseProgram(simpleShader);
 	GLint mvpLoc = glGetUniformLocation(simpleShader, "mvp");
