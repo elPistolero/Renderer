@@ -8,13 +8,15 @@
 #ifndef RENDERER_H_
 #define RENDERER_H_
 
+#include "GL/glew.h"
 #include "SceneGraph/SceneGraph.h"
 #include "SceneGraph/glm/glm/glm.hpp"
 #include "SceneGraph/glm/glm/gtc/matrix_transform.hpp"
 #include "SceneGraph/glm/glm/gtc/type_ptr.hpp"
 #include "ShaderHelper/ShaderHelper.hpp"
 #include "SDL/SDL.h"
-#include "SDL/SDL_opengl.h"
+
+#define BUFFER_OFFSET(i) ((char*)NULL + (i))
 
 const int WIDTH = 800;
 const int HEIGHT = 600;

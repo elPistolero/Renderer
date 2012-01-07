@@ -20,16 +20,57 @@ bool Renderer::init() {
 	if (!SDL_SetVideoMode(WIDTH, HEIGHT, BITSPERPIXEL, SDL_OPENGL))
 		return false;
 
+	GLenum error = glewInit();
+	if (GLEW_OK != error) {
+		std::cout << glewGetErrorString(error) << std::endl;
+		return false;
+	}
+
 	if (!initGL())
 		return false;
 
 	return true;
 }
 
+GLint simpleShader = 0;
+GLuint squareVAO = 0;
+GLuint squareIBO = 0;
+GLuint squareVBO = 0;
+glm::mat4 modelview = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -5.0f));
+
 bool Renderer::initGL() {
 	m_projection = glm::perspective(90.0f, (float)WIDTH/(float)HEIGHT, 1.0f, 1000.0f);
 
-	glClearColor(0.3, 0.3, 0.3, 1);
+	ShaderHelper shader;
+	simpleShader = shader.compileAndLinkShaders("Shader/Simple.vert", "Shader/Simple.frag");
+
+	GLfloat vertexBuffer[] = { -1, 1, 1, 1, 1, -1, -1, -1 };
+	// 0 - 1
+	// |    |
+	// 3 - 2
+	GLuint indexBuffer[] = { 1, 0, 2, 3 };
+
+	GLint vertexLoc = glGetAttribLocation(simpleShader, "vertex");
+
+	glGenVertexArrays(1, &squareVAO);
+	glBindVertexArray(squareVAO);
+
+	glGenBuffers(1, &squareVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, squareVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 2 * 4, vertexBuffer,
+			GL_STATIC_DRAW);
+	glEnableVertexAttribArray(vertexLoc);
+	glVertexAttribPointer(vertexLoc, 2, GL_FLOAT, GL_FALSE, 0,
+			BUFFER_OFFSET(0));
+
+	glGenBuffers(1, &squareIBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, squareIBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * 4, indexBuffer,
+			GL_STATIC_DRAW);
+
+	glBindVertexArray(0);
+
+	glClearColor(0.75, 0.75, 0.75, 1);
 
 	return true;
 }
@@ -39,6 +80,16 @@ void Renderer::quit() {
 }
 
 void Renderer::drawScreen() {
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glUseProgram(simpleShader);
+	GLint mvpLoc = glGetUniformLocation(simpleShader, "mvp");
+	glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(m_projection * modelview));
+	glBindVertexArray(squareVAO);
+	glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
+	glBindVertexArray(0);
+	glUseProgram(0);
+
 	SDL_GL_SwapBuffers();
 }
 

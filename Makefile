@@ -10,7 +10,7 @@ _OBJS =		Renderer.o SceneGraph.o SceneNode.o ShaderHelper.o
 
 OBJS = $(patsubst %,$(ODIR)/%,$(_OBJS))
 
-LIBS =		-lSDL -lGL 
+LIBS =		-lSDL -lGL -lGLEW
 
 TARGET =	$(BIN)/Renderer
 
