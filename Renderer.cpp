@@ -33,11 +33,13 @@ bool Renderer::init() {
 }
 
 GLint simpleShader = 0;
-GLuint squareVAO = 0;
-GLuint squareIBO = 0;
-GLuint squareVBO = 0;
+SceneNodeVAO node;
 
 bool Renderer::initGL() {
+	GLuint squareVAO = 0;
+	GLuint squareIBO = 0;
+	GLuint squareVBO = 0;
+
 	m_projection = glm::perspective(90.0f, (float)WIDTH/(float)HEIGHT, 1.0f, 1000.0f);
 
 	ShaderHelper shader;
@@ -69,6 +71,8 @@ bool Renderer::initGL() {
 
 	glBindVertexArray(0);
 
+	node.setVAOPointer(squareVAO);
+
 	glClearColor(0.75, 0.75, 0.75, 1);
 
 	return true;
@@ -89,7 +93,7 @@ void Renderer::drawScreen() {
 	glUseProgram(simpleShader);
 	GLint mvpLoc = glGetUniformLocation(simpleShader, "mvp");
 	glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(m_projection * modelview));
-	glBindVertexArray(squareVAO);
+	glBindVertexArray(node.getVAOPointer());
 	glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
 	glBindVertexArray(0);
 	glUseProgram(0);
