@@ -6,7 +6,7 @@ BIN = Build/bin
 
 CXXFLAGS =	-DGL_GLEXT_PROTOTYPES -O2 -g -Wall -fmessage-length=0
 
-_OBJS =		Renderer.o SceneGraph.o SceneNode.o SceneNodeVAO.o ShaderHelper.o
+_OBJS =		Renderer.o SceneGraph.o SceneNode.o SceneCamera.o SceneNodeVAO.o ShaderHelper.o
 
 OBJS = $(patsubst %,$(ODIR)/%,$(_OBJS))
 
@@ -31,6 +31,11 @@ $(ODIR)/SceneNode.o: SceneGraph/SceneNode.cpp
 	@mkdir -p $(ODIR)
 	@mkdir -p $(BIN)
 	$(CXX) $(CXXFLAGS) -c SceneGraph/SceneNode.cpp -o $@
+	
+$(ODIR)/SceneCamera.o: SceneGraph/SceneCamera.cpp
+	@mkdir -p $(ODIR)
+	@mkdir -p $(BIN)
+	$(CXX) $(CXXFLAGS) -c SceneGraph/SceneCamera.cpp -o $@
 	
 $(ODIR)/SceneNodeVAO.o: SceneGraph/SceneNodeVAO.cpp
 	@mkdir -p $(ODIR)

@@ -37,7 +37,7 @@ SceneNodeVAO node;
 SceneNodeVAO node2;
 SceneNodeVAO child;
 SceneNodeVAO grandchild;
-SceneNode camera;
+SceneCamera camera;
 
 bool Renderer::initGL() {
 	GLuint squareVAO = 0;
@@ -85,8 +85,9 @@ bool Renderer::initGL() {
 	node.attachNode(child);
 	child.attachNode(grandchild);
 
-	glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -5.0f));
-	camera.setTransformation(view);
+	camera.setTransformation(glm::lookAt(glm::vec3(camera.m_posX, camera.m_posY, camera.m_posZ),
+							 	 	 	 glm::vec3(camera.m_posX, camera.m_posY, -1.0f),
+							 	 	 	 glm::vec3(0.0f, 1.0f, 0.0f)));
 
 	glClearColor(0.75, 0.75, 0.75, 1);
 
@@ -102,6 +103,10 @@ void Renderer::drawScreen() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	angle += 0.01;
+
+	camera.setTransformation(glm::lookAt(glm::vec3(camera.m_posX, camera.m_posY, camera.m_posZ),
+							 	 	 	 glm::vec3(camera.m_posX, camera.m_posY, -1.0f),
+							 	 	 	 glm::vec3(0.0f, 1.0f, 0.0f)));
 
 	node.setTransformation(glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f)));
 	node2.setTransformation(glm::translate(glm::mat4(1.0f), glm::vec3(4.0f, 4.0f, 0.0f)));
@@ -141,22 +146,22 @@ void Renderer::handleInput() {
 		if (m_event.type == SDL_KEYDOWN) {
 			switch(m_event.key.keysym.sym) {
 			case SDLK_a:
-				camera.setTransformation(glm::translate(glm::mat4(camera.getTransformation()), glm::vec3(1.0f, 0.0f, 0.0f)));
+				camera.m_posX--;
 				break;
 			case SDLK_d:
-				camera.setTransformation(glm::translate(glm::mat4(camera.getTransformation()), glm::vec3(-1.0f, 0.0f, 0.0f)));
+				camera.m_posX++;
 				break;
 			case SDLK_s:
-				camera.setTransformation(glm::translate(glm::mat4(camera.getTransformation()), glm::vec3(0.0f, 1.0f, 0.0f)));
+				camera.m_posZ++;
 				break;
 			case SDLK_w:
-				camera.setTransformation(glm::translate(glm::mat4(camera.getTransformation()), glm::vec3(0.0f, -1.0f, 0.0f)));
+				camera.m_posZ--;
 				break;
 			case SDLK_q:
-				camera.setTransformation(glm::rotate(glm::mat4(camera.getTransformation()), 10.0f, glm::vec3(0.0f, 1.0f, 0.0f)));
+				camera.m_posY++;
 				break;
 			case SDLK_e:
-				camera.setTransformation(glm::rotate(glm::mat4(camera.getTransformation()), -10.0f, glm::vec3(0.0f, 1.0f, 0.0f)));
+				camera.m_posY--;
 				break;
 			default:
 				break;
