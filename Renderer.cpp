@@ -85,10 +85,6 @@ bool Renderer::initGL() {
 	node.attachNode(child);
 	child.attachNode(grandchild);
 
-	camera.setTransformation(glm::lookAt(glm::vec3(camera.m_posX, camera.m_posY, camera.m_posZ),
-							 	 	 	 glm::vec3(camera.m_posX, camera.m_posY, -1.0f),
-							 	 	 	 glm::vec3(0.0f, 1.0f, 0.0f)));
-
 	glClearColor(0.75, 0.75, 0.75, 1);
 
 	return true;
@@ -102,16 +98,9 @@ float angle = 0.0f;
 void Renderer::drawScreen() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	// update camera position
-	camera.m_posX += camera.m_xVel;
-	camera.m_posY += camera.m_yVel;
-	camera.m_posZ += camera.m_zVel;
-
 	angle += 0.01;
 
-	camera.setTransformation(glm::lookAt(glm::vec3(camera.m_posX, camera.m_posY, camera.m_posZ),
-							 	 	 	 glm::vec3(camera.m_posX, camera.m_posY, -1.0f),
-							 	 	 	 glm::vec3(0.0f, 1.0f, 0.0f)));
+	camera.updateCamera();
 
 	node.setTransformation(glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f)));
 	node2.setTransformation(glm::translate(glm::mat4(1.0f), glm::vec3(4.0f, 4.0f, 0.0f)));
@@ -154,22 +143,22 @@ void Renderer::handleInput() {
 		case SDL_KEYDOWN:
 			switch (m_event.key.keysym.sym) {
 			case SDLK_a:
-				camera.m_xVel = -0.01f;
+				camera.setXVelocity(-0.01f);
 				break;
 			case SDLK_d:
-				camera.m_xVel = 0.01f;
+				camera.setXVelocity(0.01f);
 				break;
 			case SDLK_s:
-				camera.m_zVel = 0.01f;
+				camera.setZVelocity(0.01f);
 				break;
 			case SDLK_w:
-				camera.m_zVel = -0.01f;
+				camera.setZVelocity(-0.01f);
 				break;
 			case SDLK_q:
-				camera.m_yVel = 0.01f;
+				camera.setYVelocity(0.01f);
 				break;
 			case SDLK_e:
-				camera.m_yVel = -0.01f;
+				camera.setYVelocity(-0.01f);
 				break;
 			default:
 				break;
@@ -179,28 +168,28 @@ void Renderer::handleInput() {
 			case SDL_KEYUP:
 				switch(m_event.key.keysym.sym) {
 				case SDLK_a:
-					if (camera.m_xVel < 0)
-						camera.m_xVel = 0.0f;
+					if (camera.movingLeft())
+						camera.setXVelocity(0.0f);
 					break;
 				case SDLK_d:
-					if (camera.m_xVel > 0)
-						camera.m_xVel = 0.0f;
+					if (camera.movingRight())
+						camera.setXVelocity(0.0f);
 					break;
 				case SDLK_w:
-					if (camera.m_zVel < 0)
-						camera.m_zVel = 0.0f;
+					if (camera.movingForward())
+						camera.setZVelocity(0.0f);
 					break;
 				case SDLK_s:
-					if (camera.m_zVel > 0)
-						camera.m_zVel = 0.0f;
+					if (camera.movingBackward())
+						camera.setZVelocity(0.0f);
 					break;
 				case SDLK_q:
-					if (camera.m_yVel > 0)
-						camera.m_yVel = 0.0f;
+					if (camera.movingUp())
+						camera.setYVelocity(0.0f);
 					break;
 				case SDLK_e:
-					if (camera.m_yVel < 0)
-						camera.m_yVel = 0.0f;
+					if (camera.movingDown())
+						camera.setYVelocity(0.0f);
 					break;
 				default:
 					break;
