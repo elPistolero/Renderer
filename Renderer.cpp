@@ -34,6 +34,10 @@ bool Renderer::init() {
 
 GLint simpleShader = 0;
 SceneNodeVAO node;
+SceneNodeVAO node2;
+SceneNodeVAO child;
+SceneNodeVAO grandchild;
+SceneNode camera;
 
 bool Renderer::initGL() {
 	GLuint squareVAO = 0;
@@ -72,6 +76,17 @@ bool Renderer::initGL() {
 	glBindVertexArray(0);
 
 	node.setVAOPointer(squareVAO);
+	node2.setVAOPointer(squareVAO);
+	child.setVAOPointer(squareVAO);
+	grandchild.setVAOPointer(squareVAO);
+
+	camera.attachNode(node);
+	camera.attachNode(node2);
+	node.attachNode(child);
+	child.attachNode(grandchild);
+
+	glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -5.0f));
+	camera.setTransformation(view);
 
 	glClearColor(0.75, 0.75, 0.75, 1);
 
@@ -86,14 +101,31 @@ float angle = 0.0f;
 void Renderer::drawScreen() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	// rotate
-	glm::mat4 modelview = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -5.0f)) * glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f));
 	angle += 0.01;
+
+	node.setTransformation(glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f)));
+	node2.setTransformation(glm::translate(glm::mat4(1.0f), glm::vec3(4.0f, 4.0f, 0.0f)));
+
+	child.setTransformation(glm::translate(glm::mat4(1.0f), glm::vec3(4.0f, 0.0f, 0.0f))
+						* glm::scale(glm::mat4(1.0f), glm::vec3(0.5f, 0.5f, 0.5f))
+						* glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 0.0f, 1.0f)));
+
+	grandchild.setTransformation(glm::translate(glm::mat4(1.0f), glm::vec3(4.0f, 0.0f, 0.0f))
+						* glm::scale(glm::mat4(1.0f), glm::vec3(0.5f, 0.5f, 0.5f))
+						* glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 0.0f, 1.0f)));
+
+	camera.update();
 
 	glUseProgram(simpleShader);
 	GLint mvpLoc = glGetUniformLocation(simpleShader, "mvp");
-	glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(m_projection * modelview));
+	glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(m_projection * node.getTransformation()));
 	glBindVertexArray(node.getVAOPointer());
+	glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
+	glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(m_projection * node2.getTransformation()));
+	glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
+	glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(m_projection * child.getTransformation()));
+	glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
+	glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(m_projection * grandchild.getTransformation()));
 	glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
 	glBindVertexArray(0);
 	glUseProgram(0);
@@ -105,6 +137,31 @@ void Renderer::handleInput() {
 	while (SDL_PollEvent(&m_event)) {
 		if (m_event.type == SDL_QUIT)
 			quit();
+
+		if (m_event.type == SDL_KEYDOWN) {
+			switch(m_event.key.keysym.sym) {
+			case SDLK_a:
+				camera.setTransformation(glm::translate(glm::mat4(camera.getTransformation()), glm::vec3(1.0f, 0.0f, 0.0f)));
+				break;
+			case SDLK_d:
+				camera.setTransformation(glm::translate(glm::mat4(camera.getTransformation()), glm::vec3(-1.0f, 0.0f, 0.0f)));
+				break;
+			case SDLK_s:
+				camera.setTransformation(glm::translate(glm::mat4(camera.getTransformation()), glm::vec3(0.0f, 1.0f, 0.0f)));
+				break;
+			case SDLK_w:
+				camera.setTransformation(glm::translate(glm::mat4(camera.getTransformation()), glm::vec3(0.0f, -1.0f, 0.0f)));
+				break;
+			case SDLK_q:
+				camera.setTransformation(glm::rotate(glm::mat4(camera.getTransformation()), 10.0f, glm::vec3(0.0f, 1.0f, 0.0f)));
+				break;
+			case SDLK_e:
+				camera.setTransformation(glm::rotate(glm::mat4(camera.getTransformation()), -10.0f, glm::vec3(0.0f, 1.0f, 0.0f)));
+				break;
+			default:
+				break;
+			}
+		}
 	}
 }
 
