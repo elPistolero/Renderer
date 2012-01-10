@@ -143,16 +143,16 @@ void Renderer::handleInput() {
 		case SDL_KEYDOWN:
 			switch (m_event.key.keysym.sym) {
 			case SDLK_a:
-				camera.setXVelocity(-0.01f);
-				break;
-			case SDLK_d:
 				camera.setXVelocity(0.01f);
 				break;
+			case SDLK_d:
+				camera.setXVelocity(-0.01f);
+				break;
 			case SDLK_s:
-				camera.setZVelocity(0.01f);
+				camera.setZVelocity(-0.01f);
 				break;
 			case SDLK_w:
-				camera.setZVelocity(-0.01f);
+				camera.setZVelocity(0.01f);
 				break;
 			case SDLK_q:
 				camera.setYVelocity(0.01f);
