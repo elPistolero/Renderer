@@ -143,22 +143,28 @@ void Renderer::handleInput() {
 		case SDL_KEYDOWN:
 			switch (m_event.key.keysym.sym) {
 			case SDLK_a:
-				camera.setXVelocity(0.01f);
-				break;
-			case SDLK_d:
 				camera.setXVelocity(-0.01f);
 				break;
+			case SDLK_d:
+				camera.setXVelocity(0.01f);
+				break;
 			case SDLK_s:
-				camera.setZVelocity(-0.01f);
+				camera.setZVelocity(0.01f);
 				break;
 			case SDLK_w:
-				camera.setZVelocity(0.01f);
+				camera.setZVelocity(-0.01f);
 				break;
 			case SDLK_q:
 				camera.setYVelocity(0.01f);
 				break;
 			case SDLK_e:
 				camera.setYVelocity(-0.01f);
+				break;
+			case SDLK_y:
+				camera.setXDeltaRotation(-0.01f);
+				break;
+			case SDLK_c:
+				camera.setXDeltaRotation(0.01f);
 				break;
 			default:
 				break;
@@ -190,6 +196,12 @@ void Renderer::handleInput() {
 				case SDLK_e:
 					if (camera.movingDown())
 						camera.setYVelocity(0.0f);
+					break;
+				case SDLK_y:
+					camera.setXDeltaRotation(0.0f);
+					break;
+				case SDLK_c:
+					camera.setXDeltaRotation(0.0f);
 					break;
 				default:
 					break;
