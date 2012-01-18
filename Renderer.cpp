@@ -20,6 +20,8 @@ bool Renderer::init() {
 	if (!SDL_SetVideoMode(WIDTH, HEIGHT, BITSPERPIXEL, SDL_OPENGL))
 		return false;
 
+	SDL_ShowCursor(1);
+
 	GLenum error = glewInit();
 	if (GLEW_OK != error) {
 		std::cout << glewGetErrorString(error) << std::endl;
@@ -39,33 +41,27 @@ SceneNodeVAO child;
 SceneNodeVAO grandchild;
 SceneCamera camera;
 
-bool Renderer::initGL() {
+void Renderer::initSquare(GLint vertexLoc) {
 	GLuint squareVAO = 0;
 	GLuint squareIBO = 0;
 	GLuint squareVBO = 0;
 
-	m_projection = glm::perspective(90.0f, (float)WIDTH/(float)HEIGHT, 1.0f, 1000.0f);
-
-	ShaderHelper shader;
-	simpleShader = shader.compileAndLinkShaders("Shader/Simple.vert", "Shader/Simple.frag");
-
-	GLfloat vertexBuffer[] = { -1, 1, 1, 1, 1, -1, -1, -1 };
+	GLfloat vertexBuffer[] = { -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, -1.0f, 0.0f, -1.0f, -1.0f, 0.0f };
 	// 0 - 1
 	// |    |
 	// 3 - 2
 	GLuint indexBuffer[] = { 1, 0, 2, 3 };
 
-	GLint vertexLoc = glGetAttribLocation(simpleShader, "vertex");
 
 	glGenVertexArrays(1, &squareVAO);
 	glBindVertexArray(squareVAO);
 
 	glGenBuffers(1, &squareVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, squareVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 2 * 4, vertexBuffer,
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * 4, vertexBuffer,
 			GL_STATIC_DRAW);
 	glEnableVertexAttribArray(vertexLoc);
-	glVertexAttribPointer(vertexLoc, 2, GL_FLOAT, GL_FALSE, 0,
+	glVertexAttribPointer(vertexLoc, 3, GL_FLOAT, GL_FALSE, 0,
 			BUFFER_OFFSET(0));
 
 	glGenBuffers(1, &squareIBO);
@@ -79,6 +75,16 @@ bool Renderer::initGL() {
 	node2.setVAOPointer(squareVAO);
 	child.setVAOPointer(squareVAO);
 	grandchild.setVAOPointer(squareVAO);
+}
+
+bool Renderer::initGL() {
+	ShaderHelper shader;
+	simpleShader = shader.compileAndLinkShaders("Shader/Simple.vert", "Shader/Simple.frag");
+	GLint vertexLoc = glGetAttribLocation(simpleShader, "vertex");
+
+	initSquare(vertexLoc);
+
+	m_projection = glm::perspective(90.0f, (float)WIDTH/(float)HEIGHT, 1.0f, 1000.0f);
 
 	camera.attachNode(node);
 	camera.attachNode(node2);
@@ -149,22 +155,19 @@ void Renderer::handleInput() {
 				camera.setXVelocity(0.01f);
 				break;
 			case SDLK_s:
-				camera.setZVelocity(0.01f);
-				break;
-			case SDLK_w:
 				camera.setZVelocity(-0.01f);
 				break;
-			case SDLK_q:
-				camera.setYVelocity(0.01f);
-				break;
-			case SDLK_e:
-				camera.setYVelocity(-0.01f);
+			case SDLK_w:
+				camera.setZVelocity(0.01f);
 				break;
 			case SDLK_y:
 				camera.setXDeltaRotation(-0.01f);
 				break;
 			case SDLK_c:
 				camera.setXDeltaRotation(0.01f);
+				break;
+			case SDLK_ESCAPE:
+				quit();
 				break;
 			default:
 				break;
@@ -189,14 +192,6 @@ void Renderer::handleInput() {
 					if (camera.movingBackward())
 						camera.setZVelocity(0.0f);
 					break;
-				case SDLK_q:
-					if (camera.movingUp())
-						camera.setYVelocity(0.0f);
-					break;
-				case SDLK_e:
-					if (camera.movingDown())
-						camera.setYVelocity(0.0f);
-					break;
 				case SDLK_y:
 					camera.setXDeltaRotation(0.0f);
 					break;
@@ -205,6 +200,16 @@ void Renderer::handleInput() {
 					break;
 				default:
 					break;
+				}
+				break;
+
+			case SDL_MOUSEMOTION:
+				if (m_event.motion.state & SDL_BUTTON_RMASK) {
+					camera.setXDeltaRotation(-1.0f*glm::sign(m_event.motion.xrel)*0.01f);
+					camera.setYDeltaRotation(-1.0f*glm::sign(m_event.motion.yrel)*0.01f);
+				} else {
+					camera.setXDeltaRotation(0.0f);
+					camera.setYDeltaRotation(0.0f);
 				}
 				break;
 

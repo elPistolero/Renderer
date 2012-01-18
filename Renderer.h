@@ -36,6 +36,8 @@ private:
 	glm::mat4 m_projection;
 
 	void handleInput();
+	void initSquare(GLint vertexLoc);
+	void initGrid(GLint vertexLoc);
 	bool initGL();
 };
 
