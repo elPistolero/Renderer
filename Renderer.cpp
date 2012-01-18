@@ -7,7 +7,7 @@
 
 #include "Renderer.h"
 
-Renderer::Renderer() : m_event(), m_projection(1.0) {
+Renderer::Renderer() : m_event(), m_projection(1.0), m_oldMousePos(WIDTH/2,HEIGHT/2) {
 }
 
 Renderer::~Renderer() {
@@ -21,6 +21,8 @@ bool Renderer::init() {
 		return false;
 
 	SDL_ShowCursor(1);
+	SDL_WM_GrabInput(SDL_GRAB_ON);
+	SDL_WarpMouse(WIDTH/2, HEIGHT/2);
 
 	GLenum error = glewInit();
 	if (GLEW_OK != error) {
@@ -84,7 +86,7 @@ bool Renderer::initGL() {
 
 	initSquare(vertexLoc);
 
-	m_projection = glm::perspective(90.0f, (float)WIDTH/(float)HEIGHT, 1.0f, 1000.0f);
+	m_projection = glm::perspective(60.0f, (float)WIDTH/(float)HEIGHT, 1.0f, 1000.0f);
 
 	camera.attachNode(node);
 	camera.attachNode(node2);
@@ -139,6 +141,8 @@ void Renderer::drawScreen() {
 }
 
 void Renderer::handleInput() {
+	int xPos = 0;
+	int yPos = 0;
 	while (SDL_PollEvent(&m_event)) {
 		switch (m_event.type) {
 
@@ -204,13 +208,29 @@ void Renderer::handleInput() {
 				break;
 
 			case SDL_MOUSEMOTION:
-				if (m_event.motion.state & SDL_BUTTON_RMASK) {
-					camera.setXDeltaRotation(-1.0f*glm::sign(m_event.motion.xrel)*0.01f);
-					camera.setYDeltaRotation(-1.0f*glm::sign(m_event.motion.yrel)*0.01f);
-				} else {
-					camera.setXDeltaRotation(0.0f);
-					camera.setYDeltaRotation(0.0f);
+				// get current mouse cursor position
+				SDL_GetMouseState(&xPos, &yPos);
+
+				// rotate left
+				if (xPos < m_oldMousePos.x) {
+					camera.incXRotation(0.5f);
 				}
+				// rotate right
+				if (xPos > m_oldMousePos.x) {
+					camera.incXRotation(-0.5f);
+				}
+				// rotate up
+				if (yPos < m_oldMousePos.y) {
+					camera.incYRotation(0.5f);
+				}
+				// rotate down
+				if (yPos > m_oldMousePos.y) {
+					camera.incYRotation(-0.5f);
+				}
+
+				// save mouse cursor position
+				m_oldMousePos.x = xPos;
+				m_oldMousePos.y = yPos;
 				break;
 
 			default:
