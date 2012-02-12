@@ -164,12 +164,6 @@ void Renderer::handleInput() {
 			case SDLK_w:
 				camera.setZVelocity(0.01f);
 				break;
-			case SDLK_y:
-				camera.setXDeltaRotation(-0.01f);
-				break;
-			case SDLK_c:
-				camera.setXDeltaRotation(0.01f);
-				break;
 			case SDLK_ESCAPE:
 				quit();
 				break;
@@ -195,12 +189,6 @@ void Renderer::handleInput() {
 				case SDLK_s:
 					if (camera.movingBackward())
 						camera.setZVelocity(0.0f);
-					break;
-				case SDLK_y:
-					camera.setXDeltaRotation(0.0f);
-					break;
-				case SDLK_c:
-					camera.setXDeltaRotation(0.0f);
 					break;
 				default:
 					break;
