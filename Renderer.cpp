@@ -21,7 +21,7 @@ bool Renderer::init() {
 		return false;
 
 	SDL_ShowCursor(1);
-	SDL_WM_GrabInput(SDL_GRAB_ON);
+	//SDL_WM_GrabInput(SDL_GRAB_ON);
 	SDL_WarpMouse(WIDTH/2, HEIGHT/2);
 
 	GLenum error = glewInit();
@@ -38,9 +38,6 @@ bool Renderer::init() {
 
 GLint simpleShader = 0;
 SceneNodeVAO node;
-SceneNodeVAO node2;
-SceneNodeVAO child;
-SceneNodeVAO grandchild;
 SceneCamera camera;
 
 void Renderer::initSquare(GLint vertexLoc) {
@@ -74,9 +71,6 @@ void Renderer::initSquare(GLint vertexLoc) {
 	glBindVertexArray(0);
 
 	node.setVAOPointer(squareVAO);
-	node2.setVAOPointer(squareVAO);
-	child.setVAOPointer(squareVAO);
-	grandchild.setVAOPointer(squareVAO);
 }
 
 bool Renderer::initGL() {
@@ -89,9 +83,6 @@ bool Renderer::initGL() {
 	m_projection = glm::perspective(60.0f, (float)WIDTH/(float)HEIGHT, 1.0f, 1000.0f);
 
 	camera.attachNode(node);
-	camera.attachNode(node2);
-	node.attachNode(child);
-	child.attachNode(grandchild);
 
 	glClearColor(0.75, 0.75, 0.75, 1);
 
@@ -108,31 +99,14 @@ void Renderer::drawScreen() {
 
 	angle += 0.01;
 
-	camera.updateCamera();
-
-	node.setTransformation(glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f)));
-	node2.setTransformation(glm::translate(glm::mat4(1.0f), glm::vec3(4.0f, 4.0f, 0.0f)));
-
-	child.setTransformation(glm::translate(glm::mat4(1.0f), glm::vec3(4.0f, 0.0f, 0.0f))
-						* glm::scale(glm::mat4(1.0f), glm::vec3(0.5f, 0.5f, 0.5f))
-						* glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 0.0f, 1.0f)));
-
-	grandchild.setTransformation(glm::translate(glm::mat4(1.0f), glm::vec3(4.0f, 0.0f, 0.0f))
-						* glm::scale(glm::mat4(1.0f), glm::vec3(0.5f, 0.5f, 0.5f))
-						* glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 0.0f, 1.0f)));
+	node.setLocalTransformation(glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f)));
 
 	camera.update();
 
 	glUseProgram(simpleShader);
 	GLint mvpLoc = glGetUniformLocation(simpleShader, "mvp");
-	glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(m_projection * node.getTransformation()));
+	glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(m_projection * node.getGlobalTransformation()));
 	glBindVertexArray(node.getVAOPointer());
-	glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
-	glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(m_projection * node2.getTransformation()));
-	glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
-	glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(m_projection * child.getTransformation()));
-	glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
-	glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(m_projection * grandchild.getTransformation()));
 	glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
 	glBindVertexArray(0);
 	glUseProgram(0);
