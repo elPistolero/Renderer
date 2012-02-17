@@ -4,9 +4,9 @@ ODIR = Build/Objects
 
 BIN = Build/bin
 
-CXXFLAGS =	-DGL_GLEXT_PROTOTYPES -O2 -g -Wall -fmessage-length=0
+CXXFLAGS =	-DGL_GLEXT_PROTOTYPES -g -Wall -fmessage-length=0
 
-_OBJS =		Renderer.o SceneGraph.o SceneNode.o SceneCamera.o SceneNodeVAO.o ShaderHelper.o
+_OBJS =		SceneGraph.o SceneNode.o SceneCamera.o SceneNodeVAO.o ShaderHelper.o Renderer.o
 
 OBJS = $(patsubst %,$(ODIR)/%,$(_OBJS))
 
@@ -17,11 +17,6 @@ TARGET =	$(BIN)/Renderer
 $(TARGET):	$(OBJS)
 	$(CXX) $(OBJS) $(LIBS) -o $(TARGET)
 	
-$(ODIR)/Renderer.o: Renderer.cpp
-	@mkdir -p $(ODIR)
-	@mkdir -p $(BIN)
-	$(CXX) $(CXXFLAGS) -c Renderer.cpp -o $@
-
 $(ODIR)/SceneGraph.o: SceneGraph/SceneGraph.cpp
 	@mkdir -p $(ODIR)
 	@mkdir -p $(BIN)
@@ -46,6 +41,11 @@ $(ODIR)/ShaderHelper.o: ShaderHelper/ShaderHelper.cpp
 	@mkdir -p $(ODIR)
 	@mkdir -p $(BIN)
 	$(CXX) $(CXXFLAGS) -c ShaderHelper/ShaderHelper.cpp -o $@
+
+$(ODIR)/Renderer.o: Renderer.cpp
+	@mkdir -p $(ODIR)
+	@mkdir -p $(BIN)
+	$(CXX) $(CXXFLAGS) -c Renderer.cpp -o $@
 
 all:	$(TARGET)
 

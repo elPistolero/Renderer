@@ -35,6 +35,8 @@ private:
 	SDL_Event m_event;
 	glm::mat4 m_projection;
 	glm::vec2 m_oldMousePos;
+	SceneGraph* m_graph;
+	SceneCamera* m_camera;
 
 	void handleInput();
 	void initSquare(GLint vertexLoc);
