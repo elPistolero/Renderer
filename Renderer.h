@@ -14,6 +14,7 @@
 #include "SceneGraph/glm/glm/gtc/matrix_transform.hpp"
 #include "SceneGraph/glm/glm/gtc/type_ptr.hpp"
 #include "ShaderHelper/ShaderHelper.hpp"
+#include "Importer/OBJImporter.h"
 #include "SDL/SDL.h"
 
 #define BUFFER_OFFSET(i) ((char*)NULL + (i))

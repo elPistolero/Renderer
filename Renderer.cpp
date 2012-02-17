@@ -42,23 +42,41 @@ bool Renderer::init() {
 GLint simpleShader = 0;
 
 void Renderer::initSquare(GLint vertexLoc) {
+	OBJImporter::OBJImporter objReader;
+	std::vector<GLfloat> vbo;
+	std::vector<GLuint> ibo;
+	objReader.readFile("./Resources/ball.obj", vbo, ibo);
+
+	std::vector<GLfloat>::iterator vIt;
+	for (vIt = vbo.begin(); vIt != vbo.end(); ++vIt) {
+		std::cout << "vertex: " << *vIt;
+		++vIt;
+		std::cout << ", " << *vIt;
+		++vIt;
+		std::cout << ", " << *vIt << std::endl;
+	}
+	std::cout << "vbo size: " << sizeof(GLfloat)*vbo.size() << std::endl;
+
+	std::vector<GLuint>::iterator iIt;
+	for (iIt = ibo.begin(); iIt != ibo.end(); ++iIt) {
+		std::cout << "index: " << *iIt;
+		++iIt;
+		std::cout << ", " << *iIt;
+		++iIt;
+		std::cout << ", " << *iIt << std::endl;
+	}
+	std::cout << "ibo size: " << sizeof(GLuint)*ibo.size() << std::endl;
+
 	GLuint squareVAO = 0;
 	GLuint squareIBO = 0;
 	GLuint squareVBO = 0;
-
-	GLfloat vertexBuffer[] = { -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, -1.0f, 0.0f, -1.0f, -1.0f, 0.0f };
-	// 0 - 1
-	// |    |
-	// 3 - 2
-	GLuint indexBuffer[] = { 1, 0, 2, 3 };
-
 
 	glGenVertexArrays(1, &squareVAO);
 	glBindVertexArray(squareVAO);
 
 	glGenBuffers(1, &squareVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, squareVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * 4, vertexBuffer,
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vbo.size(), &vbo[0],
 			GL_STATIC_DRAW);
 	glEnableVertexAttribArray(vertexLoc);
 	glVertexAttribPointer(vertexLoc, 3, GL_FLOAT, GL_FALSE, 0,
@@ -66,7 +84,7 @@ void Renderer::initSquare(GLint vertexLoc) {
 
 	glGenBuffers(1, &squareIBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, squareIBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * 4, indexBuffer,
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * ibo.size(), &ibo[0],
 			GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
@@ -77,6 +95,7 @@ void Renderer::initSquare(GLint vertexLoc) {
 		SceneNodeVAO* vao = dynamic_cast<SceneNodeVAO*>(*it);
 		if (vao) {
 			vao->setVAOPointer(squareVAO);
+			vao->setNumberOfFaces(ibo.size());
 		}
 	}
 }
@@ -116,7 +135,8 @@ void Renderer::drawScreen() {
 		if (vao) {
 			glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(m_projection * vao->getGlobalTransformation()));
 			glBindVertexArray(vao->getVAOPointer());
-			glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			glDrawElements(GL_TRIANGLES, vao->getNumberOfFaces()*3, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
 		}
 	}
 	glBindVertexArray(0);
