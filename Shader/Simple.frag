@@ -1,9 +1,9 @@
 #version 400 core
 
-in vec3 color;
+in vec3 lightIntensity;
 
 out vec4 output;
 
 void main() {
-	output = vec4(color, 1);
+	output = vec4(lightIntensity, 1);
 }

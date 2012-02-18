@@ -149,6 +149,7 @@ bool Renderer::initGL() {
 	mProjection = glm::perspective(60.0f, (float)WIDTH/(float)HEIGHT, 1.0f, 1000.0f);
 
 	glClearColor(0.75, 0.75, 0.75, 1);
+	glEnable(GL_DEPTH_TEST);
 
 	return true;
 }
@@ -158,7 +159,7 @@ void Renderer::quit() {
 }
 
 void Renderer::drawScreen() {
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	mCamera->update();
 
@@ -167,6 +168,7 @@ void Renderer::drawScreen() {
 	GLint projectionLoc = glGetUniformLocation(simpleShader, "projection");
 	GLint mvpLoc = glGetUniformLocation(simpleShader, "mvp");
 	GLint normalMatrixLoc = glGetUniformLocation(simpleShader, "normalMatrix");
+	GLint lightPosLoc = glGetUniformLocation(simpleShader, "lightPosition");
 
 	std::list<SceneNode*> children = mCamera->getChildren();
 	std::list<SceneNode*>::iterator it;
@@ -177,8 +179,10 @@ void Renderer::drawScreen() {
 			glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(mProjection));
 			glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(mProjection * triMesh->getGlobalTransformation()));
 			glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(triMesh->getNormalMatrix()));
+			glm::vec4 worldLight = mCamera->getGlobalTransformation() * glm::vec4(5.0f, 5.0f, 2.0f, 1.0f);
+			glUniform4f(lightPosLoc, worldLight.x, worldLight.y, worldLight.z, worldLight.w);
 			glBindVertexArray(triMesh->getVAOPointer());
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			glDrawElements(GL_TRIANGLES, triMesh->getNumberOfFaces()*3, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
 		}
 	}
