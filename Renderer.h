@@ -42,7 +42,7 @@ private:
 	SceneCamera* mCamera;
 
 	void handleInput();
-	void initSquare(GLint vertexLoc);
+	void initVAO(GLint vertexLoc, GLint vertexNormalLoc, GLint texCoordLoc);
 	void initGrid(GLint vertexLoc);
 	bool initGL();
 };

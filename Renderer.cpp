@@ -43,7 +43,7 @@ bool Renderer::init() {
 
 GLint simpleShader = 0;
 
-void Renderer::initSquare(GLint vertexLoc) {
+void Renderer::initVAO(GLint vertexLoc, GLint vertexNormalLoc, GLint texCoordLoc) {
 	Importer::OBJImporter objReader;
 	std::vector<GLfloat> vbo;
 	std::vector<GLfloat> vnbo;
@@ -87,23 +87,37 @@ void Renderer::initSquare(GLint vertexLoc) {
 	}
 	std::cout << "ibo size: " << sizeof(GLuint)*ibo.size() << std::endl;
 
-	GLuint squareVAO = 0;
-	GLuint squareIBO = 0;
-	GLuint squareVBO = 0;
+	GLuint hVAO = 0;
+	GLuint hIBO = 0;
+	GLuint hVBO[3];
 
-	glGenVertexArrays(1, &squareVAO);
-	glBindVertexArray(squareVAO);
+	glGenVertexArrays(1, &hVAO);
+	glBindVertexArray(hVAO);
 
-	glGenBuffers(1, &squareVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, squareVBO);
+	glGenBuffers(3, &hVBO[0]);
+	glBindBuffer(GL_ARRAY_BUFFER, hVBO[0]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vbo.size(), &vbo[0],
 			GL_STATIC_DRAW);
 	glEnableVertexAttribArray(vertexLoc);
 	glVertexAttribPointer(vertexLoc, 3, GL_FLOAT, GL_FALSE, 0,
 			BUFFER_OFFSET(0));
 
-	glGenBuffers(1, &squareIBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, squareIBO);
+	glBindBuffer(GL_ARRAY_BUFFER, hVBO[1]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vnbo.size(), &vnbo[0],
+			GL_STATIC_DRAW);
+	glEnableVertexAttribArray(vertexNormalLoc);
+	glVertexAttribPointer(vertexNormalLoc, 3, GL_FLOAT, GL_FALSE, 0,
+			BUFFER_OFFSET(0));
+
+	glBindBuffer(GL_ARRAY_BUFFER, hVBO[2]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vtbo.size(), &vtbo[0],
+			GL_STATIC_DRAW);
+	glEnableVertexAttribArray(texCoordLoc);
+	glVertexAttribPointer(texCoordLoc, 2, GL_FLOAT, GL_FALSE, 0,
+			BUFFER_OFFSET(0));
+
+	glGenBuffers(1, &hIBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, hIBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * ibo.size(), &ibo[0],
 			GL_STATIC_DRAW);
 
@@ -114,7 +128,7 @@ void Renderer::initSquare(GLint vertexLoc) {
 	for (it = children.begin(); it != children.end(); ++it) {
 		SceneNodeTriangleMesh* triMesh = dynamic_cast<SceneNodeTriangleMesh*>(*it);
 		if (triMesh) {
-			triMesh->setVAOPointer(squareVAO);
+			triMesh->setVAOPointer(hVAO);
 			triMesh->setNumberOfFaces(ibo.size());
 		}
 	}
@@ -124,11 +138,13 @@ bool Renderer::initGL() {
 	Shader::ShaderHelper shader;
 	simpleShader = shader.compileAndLinkShaders("Shader/Simple.vert", "Shader/Simple.frag");
 	GLint vertexLoc = glGetAttribLocation(simpleShader, "vertex");
+	GLint vertexNormalLoc = glGetAttribLocation(simpleShader, "vertexNormal");
+	GLint texCoordLoc = glGetAttribLocation(simpleShader, "texCoord");
 
 	SceneNodeTriangleMesh* node = new SceneNodeTriangleMesh();
 	mCamera->attachNode(*node);
 
-	initSquare(vertexLoc);
+	initVAO(vertexLoc, vertexNormalLoc, texCoordLoc);
 
 	mProjection = glm::perspective(60.0f, (float)WIDTH/(float)HEIGHT, 1.0f, 1000.0f);
 
@@ -147,13 +163,20 @@ void Renderer::drawScreen() {
 	mCamera->update();
 
 	glUseProgram(simpleShader);
+	GLint modelviewLoc = glGetUniformLocation(simpleShader, "modelview");
+	GLint projectionLoc = glGetUniformLocation(simpleShader, "projection");
 	GLint mvpLoc = glGetUniformLocation(simpleShader, "mvp");
+	GLint normalMatrixLoc = glGetUniformLocation(simpleShader, "normalMatrix");
+
 	std::list<SceneNode*> children = mCamera->getChildren();
 	std::list<SceneNode*>::iterator it;
 	for (it = children.begin(); it != children.end(); ++it) {
 		SceneNodeTriangleMesh* triMesh = dynamic_cast<SceneNodeTriangleMesh*>(*it);
 		if (triMesh) {
+			glUniformMatrix4fv(modelviewLoc, 1, GL_FALSE, glm::value_ptr(triMesh->getGlobalTransformation()));
+			glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(mProjection));
 			glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(mProjection * triMesh->getGlobalTransformation()));
+			glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(triMesh->getNormalMatrix()));
 			glBindVertexArray(triMesh->getVAOPointer());
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			glDrawElements(GL_TRIANGLES, triMesh->getNumberOfFaces()*3, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
