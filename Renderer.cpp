@@ -46,8 +46,10 @@ GLint simpleShader = 0;
 void Renderer::initSquare(GLint vertexLoc) {
 	Importer::OBJImporter objReader;
 	std::vector<GLfloat> vbo;
+	std::vector<GLfloat> vnbo;
+	std::vector<GLfloat> vtbo;
 	std::vector<GLuint> ibo;
-	objReader.readFile("./Resources/ball.obj", vbo, ibo);
+	objReader.readFile("./Resources/test.obj", vbo, vnbo, vtbo, ibo);
 
 	std::vector<GLfloat>::iterator vIt;
 	for (vIt = vbo.begin(); vIt != vbo.end(); ++vIt) {
@@ -58,6 +60,22 @@ void Renderer::initSquare(GLint vertexLoc) {
 		std::cout << ", " << *vIt << std::endl;
 	}
 	std::cout << "vbo size: " << sizeof(GLfloat)*vbo.size() << std::endl;
+
+	for (vIt = vnbo.begin(); vIt != vnbo.end(); ++vIt) {
+		std::cout << "vertex normal: " << *vIt;
+		++vIt;
+		std::cout << ", " << *vIt;
+		++vIt;
+		std::cout << ", " << *vIt << std::endl;
+	}
+	std::cout << "vnbo size: " << sizeof(GLfloat)*vnbo.size() << std::endl;
+
+	for (vIt = vtbo.begin(); vIt != vtbo.end(); ++vIt) {
+		std::cout << "texture coord: " << *vIt;
+		++vIt;
+		std::cout << ", " << *vIt << std::endl;
+	}
+	std::cout << "vtbo size: " << sizeof(GLfloat)*vtbo.size() << std::endl;
 
 	std::vector<GLuint>::iterator iIt;
 	for (iIt = ibo.begin(); iIt != ibo.end(); ++iIt) {

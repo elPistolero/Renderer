@@ -11,7 +11,8 @@
 #include "GL/glew.h"
 #include <vector>
 #include <fstream>
-#include <string>
+#include <string.h>
+#include <stdio.h>
 #include <iostream>
 
 namespace Importer {
@@ -21,7 +22,11 @@ public:
 	OBJImporter();
 	virtual ~OBJImporter();
 
-	void readFile(const std::string& filename, std::vector<GLfloat>& vertexBuffer, std::vector<GLuint>& indexBuffer);
+	void readFile(const std::string& filename,
+			std::vector<GLfloat>& vertexBuffer,
+			std::vector<GLfloat>& vertexNormalBuffer,
+			std::vector<GLfloat>& textureCoordBuffer,
+			std::vector<GLuint>& indexBuffer);
 };
 
 } /* namespace Importer */
