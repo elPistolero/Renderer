@@ -23,6 +23,8 @@ const int WIDTH = 800;
 const int HEIGHT = 600;
 const int BITSPERPIXEL = 32;
 
+using namespace Scene;
+
 class Renderer {
 public:
 	Renderer();
@@ -33,11 +35,11 @@ public:
 	void mainLoop();
 
 private:
-	SDL_Event m_event;
-	glm::mat4 m_projection;
-	glm::vec2 m_oldMousePos;
-	SceneGraph* m_graph;
-	SceneCamera* m_camera;
+	SDL_Event mEvent;
+	glm::mat4 mProjection;
+	glm::vec2 mOldMousePos;
+	SceneGraph* mGraph;
+	SceneCamera* mCamera;
 
 	void handleInput();
 	void initSquare(GLint vertexLoc);

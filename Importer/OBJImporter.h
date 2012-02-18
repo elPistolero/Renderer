@@ -14,7 +14,7 @@
 #include <string>
 #include <iostream>
 
-namespace OBJImporter {
+namespace Importer {
 
 class OBJImporter {
 public:
@@ -24,5 +24,5 @@ public:
 	void readFile(const std::string& filename, std::vector<GLfloat>& vertexBuffer, std::vector<GLuint>& indexBuffer);
 };
 
-} /* namespace OBJImporter */
+} /* namespace Importer */
 #endif /* OBJIMPORTER_H_ */

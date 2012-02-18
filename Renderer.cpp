@@ -7,13 +7,15 @@
 
 #include "Renderer.h"
 
-Renderer::Renderer() : m_event(), m_projection(1.0), m_oldMousePos(WIDTH/2,HEIGHT/2), m_graph(0), m_camera(0) {
-	m_graph = new SceneGraph();
-	m_camera = m_graph->getRoot();
+using namespace Scene;
+
+Renderer::Renderer() : mEvent(), mProjection(1.0), mOldMousePos(WIDTH/2,HEIGHT/2), mGraph(0), mCamera(0) {
+	mGraph = new SceneGraph();
+	mCamera = mGraph->getRoot();
 }
 
 Renderer::~Renderer() {
-	delete m_graph;
+	delete mGraph;
 }
 
 bool Renderer::init() {
@@ -42,7 +44,7 @@ bool Renderer::init() {
 GLint simpleShader = 0;
 
 void Renderer::initSquare(GLint vertexLoc) {
-	OBJImporter::OBJImporter objReader;
+	Importer::OBJImporter objReader;
 	std::vector<GLfloat> vbo;
 	std::vector<GLuint> ibo;
 	objReader.readFile("./Resources/ball.obj", vbo, ibo);
@@ -89,28 +91,28 @@ void Renderer::initSquare(GLint vertexLoc) {
 
 	glBindVertexArray(0);
 
-	std::list<SceneNode*> children = m_camera->getChildren();
+	std::list<SceneNode*> children = mCamera->getChildren();
 	std::list<SceneNode*>::iterator it;
 	for (it = children.begin(); it != children.end(); ++it) {
-		SceneNodeVAO* vao = dynamic_cast<SceneNodeVAO*>(*it);
-		if (vao) {
-			vao->setVAOPointer(squareVAO);
-			vao->setNumberOfFaces(ibo.size());
+		SceneNodeTriangleMesh* triMesh = dynamic_cast<SceneNodeTriangleMesh*>(*it);
+		if (triMesh) {
+			triMesh->setVAOPointer(squareVAO);
+			triMesh->setNumberOfFaces(ibo.size());
 		}
 	}
 }
 
 bool Renderer::initGL() {
-	ShaderHelper shader;
+	Shader::ShaderHelper shader;
 	simpleShader = shader.compileAndLinkShaders("Shader/Simple.vert", "Shader/Simple.frag");
 	GLint vertexLoc = glGetAttribLocation(simpleShader, "vertex");
 
-	SceneNodeVAO* node = new SceneNodeVAO();
-	m_camera->attachNode(*node);
+	SceneNodeTriangleMesh* node = new SceneNodeTriangleMesh();
+	mCamera->attachNode(*node);
 
 	initSquare(vertexLoc);
 
-	m_projection = glm::perspective(60.0f, (float)WIDTH/(float)HEIGHT, 1.0f, 1000.0f);
+	mProjection = glm::perspective(60.0f, (float)WIDTH/(float)HEIGHT, 1.0f, 1000.0f);
 
 	glClearColor(0.75, 0.75, 0.75, 1);
 
@@ -124,19 +126,19 @@ void Renderer::quit() {
 void Renderer::drawScreen() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	m_camera->update();
+	mCamera->update();
 
 	glUseProgram(simpleShader);
 	GLint mvpLoc = glGetUniformLocation(simpleShader, "mvp");
-	std::list<SceneNode*> children = m_camera->getChildren();
+	std::list<SceneNode*> children = mCamera->getChildren();
 	std::list<SceneNode*>::iterator it;
 	for (it = children.begin(); it != children.end(); ++it) {
-		SceneNodeVAO* vao = dynamic_cast<SceneNodeVAO*>(*it);
-		if (vao) {
-			glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(m_projection * vao->getGlobalTransformation()));
-			glBindVertexArray(vao->getVAOPointer());
+		SceneNodeTriangleMesh* triMesh = dynamic_cast<SceneNodeTriangleMesh*>(*it);
+		if (triMesh) {
+			glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(mProjection * triMesh->getGlobalTransformation()));
+			glBindVertexArray(triMesh->getVAOPointer());
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			glDrawElements(GL_TRIANGLES, vao->getNumberOfFaces()*3, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
+			glDrawElements(GL_TRIANGLES, triMesh->getNumberOfFaces()*3, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
 		}
 	}
 	glBindVertexArray(0);
@@ -148,26 +150,26 @@ void Renderer::drawScreen() {
 void Renderer::handleInput() {
 	int xPos = 0;
 	int yPos = 0;
-	while (SDL_PollEvent(&m_event)) {
-		switch (m_event.type) {
+	while (SDL_PollEvent(&mEvent)) {
+		switch (mEvent.type) {
 
 		case SDL_QUIT:
 			quit();
 			break;
 
 		case SDL_KEYDOWN:
-			switch (m_event.key.keysym.sym) {
+			switch (mEvent.key.keysym.sym) {
 			case SDLK_a:
-				m_camera->setXVelocity(-0.01f);
+				mCamera->setXVelocity(-0.01f);
 				break;
 			case SDLK_d:
-				m_camera->setXVelocity(0.01f);
+				mCamera->setXVelocity(0.01f);
 				break;
 			case SDLK_s:
-				m_camera->setZVelocity(-0.01f);
+				mCamera->setZVelocity(-0.01f);
 				break;
 			case SDLK_w:
-				m_camera->setZVelocity(0.01f);
+				mCamera->setZVelocity(0.01f);
 				break;
 			case SDLK_ESCAPE:
 				quit();
@@ -178,22 +180,22 @@ void Renderer::handleInput() {
 			break;
 
 			case SDL_KEYUP:
-				switch(m_event.key.keysym.sym) {
+				switch(mEvent.key.keysym.sym) {
 				case SDLK_a:
-					if (m_camera->movingLeft())
-						m_camera->setXVelocity(0.0f);
+					if (mCamera->movingLeft())
+						mCamera->setXVelocity(0.0f);
 					break;
 				case SDLK_d:
-					if (m_camera->movingRight())
-						m_camera->setXVelocity(0.0f);
+					if (mCamera->movingRight())
+						mCamera->setXVelocity(0.0f);
 					break;
 				case SDLK_w:
-					if (m_camera->movingForward())
-						m_camera->setZVelocity(0.0f);
+					if (mCamera->movingForward())
+						mCamera->setZVelocity(0.0f);
 					break;
 				case SDLK_s:
-					if (m_camera->movingBackward())
-						m_camera->setZVelocity(0.0f);
+					if (mCamera->movingBackward())
+						mCamera->setZVelocity(0.0f);
 					break;
 				default:
 					break;
@@ -205,25 +207,25 @@ void Renderer::handleInput() {
 				SDL_GetMouseState(&xPos, &yPos);
 
 				// rotate left
-				if (xPos < m_oldMousePos.x) {
-					m_camera->incXRotation(0.5f);
+				if (xPos < mOldMousePos.x) {
+					mCamera->incXRotation(0.5f);
 				}
 				// rotate right
-				if (xPos > m_oldMousePos.x) {
-					m_camera->incXRotation(-0.5f);
+				if (xPos > mOldMousePos.x) {
+					mCamera->incXRotation(-0.5f);
 				}
 				// rotate up
-				if (yPos < m_oldMousePos.y) {
-					m_camera->incYRotation(0.5f);
+				if (yPos < mOldMousePos.y) {
+					mCamera->incYRotation(0.5f);
 				}
 				// rotate down
-				if (yPos > m_oldMousePos.y) {
-					m_camera->incYRotation(-0.5f);
+				if (yPos > mOldMousePos.y) {
+					mCamera->incYRotation(-0.5f);
 				}
 
 				// save mouse cursor position
-				m_oldMousePos.x = xPos;
-				m_oldMousePos.y = yPos;
+				mOldMousePos.x = xPos;
+				mOldMousePos.y = yPos;
 				break;
 
 			default:

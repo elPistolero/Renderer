@@ -7,7 +7,7 @@
 
 #include "OBJImporter.h"
 
-namespace OBJImporter {
+namespace Importer {
 
 OBJImporter::OBJImporter() {
 }
