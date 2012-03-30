@@ -9,11 +9,9 @@
 #define RENDERER_H_
 
 #include "GL/glew.h"
+#include "ProjectWideHeaders.h"
 #include "SceneGraph/SceneGraph.h"
-#include "SceneGraph/glm/glm/glm.hpp"
-#include "SceneGraph/glm/glm/gtc/matrix_transform.hpp"
-#include "SceneGraph/glm/glm/gtc/type_ptr.hpp"
-#include "ShaderHelper/GLSLProgram.hpp"
+#include "GLSLProgram/GLSLProgram.hpp"
 #include "Importer/OBJImporter.h"
 #include "SDL/SDL.h"
 

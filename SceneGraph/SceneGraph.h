@@ -8,10 +8,10 @@
 #ifndef SCENEGRAPH_H_
 #define SCENEGRAPH_H_
 
+#include "../ProjectWideHeaders.h"
 #include "SceneNode.h"
 #include "SceneNodeTriangleMesh.h"
 #include "SceneCamera.h"
-#include "iostream"
 
 namespace Scene {
 

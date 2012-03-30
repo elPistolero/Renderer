@@ -9,7 +9,6 @@
 #define SCENECAMERA_H_
 
 #include "SceneNode.h"
-#include "glm/glm/gtc/matrix_transform.hpp"
 
 namespace Scene {
 

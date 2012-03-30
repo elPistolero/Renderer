@@ -3,8 +3,7 @@
 
 #include <fstream>
 #include <GL/gl.h>
-#include "../SceneGraph/glm/glm/glm.hpp"
-#include "iostream"
+#include "../ProjectWideHeaders.h"
 
 namespace Shader {
 

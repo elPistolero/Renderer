@@ -37,10 +37,10 @@ $(ODIR)/SceneNodeTriangleMesh.o: SceneGraph/SceneNodeTriangleMesh.cpp
 	@mkdir -p $(BIN)
 	$(CXX) $(CXXFLAGS) -c SceneGraph/SceneNodeTriangleMesh.cpp -o $@
 	
-$(ODIR)/GLSLProgram.o: ShaderHelper/GLSLProgram.cpp
+$(ODIR)/GLSLProgram.o: GLSLProgram/GLSLProgram.cpp
 	@mkdir -p $(ODIR)
 	@mkdir -p $(BIN)
-	$(CXX) $(CXXFLAGS) -c ShaderHelper/GLSLProgram.cpp -o $@
+	$(CXX) $(CXXFLAGS) -c GLSLProgram/GLSLProgram.cpp -o $@
 	
 $(ODIR)/OBJImporter.o: Importer/OBJImporter.cpp
 	@mkdir -p $(ODIR)

@@ -10,9 +10,7 @@
 
 #include <GL/glew.h>
 #include <list>
-#include "glm/glm/glm.hpp"
-#include "glm/glm/gtc/matrix_inverse.hpp"
-#include "iostream"
+#include "../ProjectWideHeaders.h"
 
 namespace Scene {
 
