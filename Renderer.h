@@ -13,7 +13,7 @@
 #include "SceneGraph/glm/glm/glm.hpp"
 #include "SceneGraph/glm/glm/gtc/matrix_transform.hpp"
 #include "SceneGraph/glm/glm/gtc/type_ptr.hpp"
-#include "ShaderHelper/ShaderHelper.hpp"
+#include "ShaderHelper/GLSLProgram.hpp"
 #include "Importer/OBJImporter.h"
 #include "SDL/SDL.h"
 

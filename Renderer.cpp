@@ -15,7 +15,7 @@ Renderer::Renderer() : mEvent(), mProjection(1.0), mOldMousePos(WIDTH/2,HEIGHT/2
 }
 
 Renderer::~Renderer() {
-	delete mGraph;
+        delete mGraph;
 }
 
 bool Renderer::init() {
@@ -40,8 +40,6 @@ bool Renderer::init() {
 
 	return true;
 }
-
-GLint simpleShader = 0;
 
 void Renderer::initVAO(GLint vertexLoc, GLint vertexNormalLoc, GLint texCoordLoc) {
 	Importer::OBJImporter objReader;
@@ -134,17 +132,17 @@ void Renderer::initVAO(GLint vertexLoc, GLint vertexNormalLoc, GLint texCoordLoc
 	}
 }
 
+Shader::GLSLProgram shader;
 bool Renderer::initGL() {
-	Shader::ShaderHelper shader;
-	simpleShader = shader.compileAndLinkShaders("Shader/Simple.vert", "Shader/Simple.frag");
-	GLint vertexLoc = glGetAttribLocation(simpleShader, "vertex");
-	GLint vertexNormalLoc = glGetAttribLocation(simpleShader, "vertexNormal");
-	GLint texCoordLoc = glGetAttribLocation(simpleShader, "texCoord");
+	shader.compileAndLinkShaders("Shader/Simple.vert", "Shader/Simple.frag");
+	shader.bindAttribLocation(0, "vertex");
+	shader.bindAttribLocation(1, "vertexNormal");
+	shader.bindAttribLocation(2, "texCoord");
 
 	SceneNodeTriangleMesh* node = new SceneNodeTriangleMesh();
 	mCamera->attachNode(*node);
 
-	initVAO(vertexLoc, vertexNormalLoc, texCoordLoc);
+	initVAO(0, 1, 2);
 
 	mProjection = glm::perspective(60.0f, (float)WIDTH/(float)HEIGHT, 1.0f, 1000.0f);
 
@@ -163,26 +161,20 @@ void Renderer::drawScreen() {
 
 	mCamera->update();
 
-	glUseProgram(simpleShader);
-	GLint modelviewLoc = glGetUniformLocation(simpleShader, "modelview");
-	GLint projectionLoc = glGetUniformLocation(simpleShader, "projection");
-	GLint mvpLoc = glGetUniformLocation(simpleShader, "mvp");
-	GLint normalMatrixLoc = glGetUniformLocation(simpleShader, "normalMatrix");
-	GLint lightPosLoc = glGetUniformLocation(simpleShader, "lightPosition");
+	shader.use();
 
 	std::list<SceneNode*> children = mCamera->getChildren();
 	std::list<SceneNode*>::iterator it;
 	for (it = children.begin(); it != children.end(); ++it) {
 		SceneNodeTriangleMesh* triMesh = dynamic_cast<SceneNodeTriangleMesh*>(*it);
 		if (triMesh) {
-			glUniformMatrix4fv(modelviewLoc, 1, GL_FALSE, glm::value_ptr(triMesh->getGlobalTransformation()));
-			glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(mProjection));
-			glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(mProjection * triMesh->getGlobalTransformation()));
-			glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(triMesh->getNormalMatrix()));
+		  shader.setUniform("modelview", triMesh->getGlobalTransformation());
+		  //shader.setUniform("projection", mProjection);
+		  shader.setUniform("mvp", mProjection * triMesh->getGlobalTransformation());
+		  shader.setUniform("normalMatrix", triMesh->getNormalMatrix());
 			glm::vec4 worldLight = mCamera->getGlobalTransformation() * glm::vec4(5.0f, 5.0f, 2.0f, 1.0f);
-			glUniform4f(lightPosLoc, worldLight.x, worldLight.y, worldLight.z, worldLight.w);
+			shader.setUniform("lightPosition", worldLight);
 			glBindVertexArray(triMesh->getVAOPointer());
-			//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			glDrawElements(GL_TRIANGLES, triMesh->getNumberOfFaces()*3, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
 		}
 	}

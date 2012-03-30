@@ -6,7 +6,7 @@ BIN = Build/bin
 
 CXXFLAGS =	-DGL_GLEXT_PROTOTYPES -g -Wall -fmessage-length=0
 
-_OBJS =		SceneGraph.o SceneNode.o SceneCamera.o SceneNodeTriangleMesh.o ShaderHelper.o OBJImporter.o Renderer.o
+_OBJS =		SceneGraph.o SceneNode.o SceneCamera.o SceneNodeTriangleMesh.o GLSLProgram.o OBJImporter.o Renderer.o
 
 OBJS = $(patsubst %,$(ODIR)/%,$(_OBJS))
 
@@ -37,10 +37,10 @@ $(ODIR)/SceneNodeTriangleMesh.o: SceneGraph/SceneNodeTriangleMesh.cpp
 	@mkdir -p $(BIN)
 	$(CXX) $(CXXFLAGS) -c SceneGraph/SceneNodeTriangleMesh.cpp -o $@
 	
-$(ODIR)/ShaderHelper.o: ShaderHelper/ShaderHelper.cpp
+$(ODIR)/GLSLProgram.o: ShaderHelper/GLSLProgram.cpp
 	@mkdir -p $(ODIR)
 	@mkdir -p $(BIN)
-	$(CXX) $(CXXFLAGS) -c ShaderHelper/ShaderHelper.cpp -o $@
+	$(CXX) $(CXXFLAGS) -c ShaderHelper/GLSLProgram.cpp -o $@
 	
 $(ODIR)/OBJImporter.o: Importer/OBJImporter.cpp
 	@mkdir -p $(ODIR)
