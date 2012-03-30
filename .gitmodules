@@ -1,6 +1,0 @@
-[submodule "SceneGraph"]
-	path = SceneGraph
-	url = git@github.com:elPistolero/SceneGraph.git
-[submodule "ShaderHelper"]
-	path = ShaderHelper
-	url = git@github.com:elPistolero/ShaderHelper.git
