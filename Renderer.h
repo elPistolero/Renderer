@@ -38,6 +38,7 @@ glm::mat4 mProjection;
 glm::vec2 mOldMousePos;
 SceneGraph* mGraph;
 SceneCamera* mCamera;
+Shader::GLSLProgram* mSimpleShader;
 
 void handleInput();
 void initVAO(GLint vertexLoc, GLint vertexNormalLoc, GLint texCoordLoc);

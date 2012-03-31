@@ -9,13 +9,14 @@
 
 using namespace Scene;
 
-Renderer::Renderer() : mEvent(), mProjection(1.0), mOldMousePos(WIDTH/2,HEIGHT/2), mGraph(0), mCamera(0) {
+Renderer::Renderer() : mEvent(), mProjection(1.0), mOldMousePos(WIDTH/2,HEIGHT/2), mGraph(0), mCamera(0), mSimpleShader(0) {
     mGraph = new SceneGraph();
     mCamera = mGraph->getRoot();
 }
 
 Renderer::~Renderer() {
     delete mGraph;
+    delete mSimpleShader;
 }
 
 bool Renderer::init() {
@@ -132,12 +133,12 @@ void Renderer::initVAO(GLint vertexLoc, GLint vertexNormalLoc, GLint texCoordLoc
     }
 }
 
-Shader::GLSLProgram shader;
 bool Renderer::initGL() {
-    shader.compileAndLinkShaders("Shader/Simple.vert", "Shader/Simple.frag");
-    shader.bindAttribLocation(0, "vertex");
-    shader.bindAttribLocation(1, "vertexNormal");
-    shader.bindAttribLocation(2, "texCoord");
+    mSimpleShader = new Shader::GLSLProgram();
+    mSimpleShader->compileAndLinkShaders("Shader/Simple.vert", "Shader/Simple.frag");
+    mSimpleShader->bindAttribLocation(0, "vertex");
+    mSimpleShader->bindAttribLocation(1, "vertexNormal");
+    mSimpleShader->bindAttribLocation(2, "texCoord");
 
     SceneNodeTriangleMesh* node = new SceneNodeTriangleMesh();
     mCamera->attachNode(*node);
@@ -161,19 +162,19 @@ void Renderer::drawScreen() {
 
     mCamera->update();
 
-    shader.use();
+    mSimpleShader->use();
 
     std::list<SceneNode*> children = mCamera->getChildren();
     std::list<SceneNode*>::iterator it;
     for (it = children.begin(); it != children.end(); ++it) {
         SceneNodeTriangleMesh* triMesh = dynamic_cast<SceneNodeTriangleMesh*>(*it);
         if (triMesh) {
-            shader.setUniform("modelview", triMesh->getGlobalTransformation());
+            mSimpleShader->setUniform("modelview", triMesh->getGlobalTransformation());
             //shader.setUniform("projection", mProjection);
-            shader.setUniform("mvp", mProjection * triMesh->getGlobalTransformation());
-            shader.setUniform("normalMatrix", triMesh->getNormalMatrix());
+            mSimpleShader->setUniform("mvp", mProjection * triMesh->getGlobalTransformation());
+            mSimpleShader->setUniform("normalMatrix", triMesh->getNormalMatrix());
             glm::vec4 worldLight = mCamera->getGlobalTransformation() * glm::vec4(5.0f, 5.0f, 2.0f, 1.0f);
-            shader.setUniform("lightPosition", worldLight);
+            mSimpleShader->setUniform("lightPosition", worldLight);
             glBindVertexArray(triMesh->getVAOPointer());
             glDrawElements(GL_TRIANGLES, triMesh->getNumberOfFaces()*3, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
         }
