@@ -10,7 +10,7 @@
 namespace Scene {
 
 SceneNodeTriangleMesh::SceneNodeTriangleMesh()
-: mHVao(0), mNumFaces(0) {
+    : mHVao(0), mNumFaces(0) {
 }
 
 SceneNodeTriangleMesh::~SceneNodeTriangleMesh() {

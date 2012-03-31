@@ -25,24 +25,24 @@ using namespace Scene;
 
 class Renderer {
 public:
-	Renderer();
-	virtual ~Renderer();
-	bool init();
-	void quit();
-	void drawScreen();
-	void mainLoop();
+Renderer();
+virtual ~Renderer();
+bool init();
+void quit();
+void drawScreen();
+void mainLoop();
 
 private:
-	SDL_Event mEvent;
-	glm::mat4 mProjection;
-	glm::vec2 mOldMousePos;
-	SceneGraph* mGraph;
-	SceneCamera* mCamera;
+SDL_Event mEvent;
+glm::mat4 mProjection;
+glm::vec2 mOldMousePos;
+SceneGraph* mGraph;
+SceneCamera* mCamera;
 
-	void handleInput();
-	void initVAO(GLint vertexLoc, GLint vertexNormalLoc, GLint texCoordLoc);
-	void initGrid(GLint vertexLoc);
-	bool initGL();
+void handleInput();
+void initVAO(GLint vertexLoc, GLint vertexNormalLoc, GLint texCoordLoc);
+void initGrid(GLint vertexLoc);
+bool initGL();
 };
 
 #endif /* RENDERER_H_ */

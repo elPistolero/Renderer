@@ -10,11 +10,11 @@
 namespace Scene {
 
 SceneGraph::SceneGraph() : mRoot(0) {
-	mRoot = new SceneCamera();
+    mRoot = new SceneCamera();
 }
 
 SceneGraph::~SceneGraph() {
-	delete mRoot;
+    delete mRoot;
 }
 
 }

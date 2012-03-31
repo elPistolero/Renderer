@@ -12,19 +12,27 @@
 
 namespace Scene {
 
-class SceneNodeTriangleMesh: public SceneNode {
+class SceneNodeTriangleMesh : public SceneNode {
 public:
-	SceneNodeTriangleMesh();
-	virtual ~SceneNodeTriangleMesh();
+SceneNodeTriangleMesh();
+virtual ~SceneNodeTriangleMesh();
 
-	GLuint getVAOPointer() { return mHVao; }
-	void setVAOPointer(GLuint vao) { mHVao = vao; }
-	int getNumberOfFaces() { return mNumFaces; }
-	void setNumberOfFaces(int faces) { mNumFaces = faces; }
+GLuint getVAOPointer() {
+    return mHVao;
+}
+void setVAOPointer(GLuint vao) {
+    mHVao = vao;
+}
+int getNumberOfFaces() {
+    return mNumFaces;
+}
+void setNumberOfFaces(int faces) {
+    mNumFaces = faces;
+}
 
 private:
-	GLuint mHVao;
-	int mNumFaces;
+GLuint mHVao;
+int mNumFaces;
 };
 
 }

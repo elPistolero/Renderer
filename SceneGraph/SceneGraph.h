@@ -17,13 +17,17 @@ namespace Scene {
 
 class SceneGraph {
 public:
-	SceneGraph();
-	virtual ~SceneGraph();
-	SceneCamera* getRoot() { return mRoot; }
-	void setRoot(SceneCamera* root) { mRoot = root; }
+SceneGraph();
+virtual ~SceneGraph();
+SceneCamera* getRoot() {
+    return mRoot;
+}
+void setRoot(SceneCamera* root) {
+    mRoot = root;
+}
 
 private:
-	SceneCamera* mRoot;
+SceneCamera* mRoot;
 };
 
 }
