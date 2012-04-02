@@ -9,9 +9,10 @@
 
 using namespace Scene;
 
-Renderer::Renderer() : mEvent(), mProjection(1.0), mOldMousePos(WIDTH/2,HEIGHT/2), mGraph(0), mCamera(0), mSimpleShader(0) {
+Renderer::Renderer(const QGLFormat& format, QWidget* parent) : QGLWidget(format, parent), mProjection(1.0), mOldMousePos(WIDTH/2,HEIGHT/2), mGraph(0), mCamera(0), mSimpleShader(0) {
     mGraph = new SceneGraph();
     mCamera = mGraph->getRoot();
+    this->setMinimumSize(800,600);
 }
 
 Renderer::~Renderer() {
@@ -19,27 +20,28 @@ Renderer::~Renderer() {
     delete mSimpleShader;
 }
 
-bool Renderer::init() {
-    if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
-        return false;
-
-    if (!SDL_SetVideoMode(WIDTH, HEIGHT, BITSPERPIXEL, SDL_OPENGL))
-        return false;
-
-    SDL_ShowCursor(1);
-    //SDL_WM_GrabInput(SDL_GRAB_ON);
-    SDL_WarpMouse(WIDTH/2, HEIGHT/2);
-
+void Renderer::initializeGL() {
+    glewExperimental = GL_TRUE;
     GLenum error = glewInit();
     if (GLEW_OK != error) {
         std::cout << glewGetErrorString(error) << std::endl;
-        return false;
     }
 
-    if (!initGL())
-        return false;
+    mSimpleShader = new Shader::GLSLProgram();
+    mSimpleShader->compileAndLinkShaders("Shader/Simple.vert", "Shader/Simple.frag");
+    mSimpleShader->bindAttribLocation(0, "vertex");
+    mSimpleShader->bindAttribLocation(1, "vertexNormal");
+    mSimpleShader->bindAttribLocation(2, "texCoord");
 
-    return true;
+    SceneNodeTriangleMesh* node = new SceneNodeTriangleMesh();
+    mCamera->attachNode(*node);
+
+    initVAO(0, 1, 2);
+
+    mProjection = glm::perspective(60.0f, (float)WIDTH/(float)HEIGHT, 1.0f, 1000.0f);
+
+    glClearColor(0.75, 0.75, 0.75, 1);
+    glEnable(GL_DEPTH_TEST);
 }
 
 void Renderer::initVAO(GLint vertexLoc, GLint vertexNormalLoc, GLint texCoordLoc) {
@@ -133,31 +135,11 @@ void Renderer::initVAO(GLint vertexLoc, GLint vertexNormalLoc, GLint texCoordLoc
     }
 }
 
-bool Renderer::initGL() {
-    mSimpleShader = new Shader::GLSLProgram();
-    mSimpleShader->compileAndLinkShaders("Shader/Simple.vert", "Shader/Simple.frag");
-    mSimpleShader->bindAttribLocation(0, "vertex");
-    mSimpleShader->bindAttribLocation(1, "vertexNormal");
-    mSimpleShader->bindAttribLocation(2, "texCoord");
-
-    SceneNodeTriangleMesh* node = new SceneNodeTriangleMesh();
-    mCamera->attachNode(*node);
-
-    initVAO(0, 1, 2);
-
+void Renderer::resizeGL(int w, int h) {
     mProjection = glm::perspective(60.0f, (float)WIDTH/(float)HEIGHT, 1.0f, 1000.0f);
-
-    glClearColor(0.75, 0.75, 0.75, 1);
-    glEnable(GL_DEPTH_TEST);
-
-    return true;
 }
 
-void Renderer::quit() {
-    SDL_Quit();
-}
-
-void Renderer::drawScreen() {
+void Renderer::paintGL() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     mCamera->update();
@@ -182,108 +164,21 @@ void Renderer::drawScreen() {
     glBindVertexArray(0);
     glUseProgram(0);
 
-    SDL_GL_SwapBuffers();
+    glFinish();
 }
 
-void Renderer::handleInput() {
-    int xPos = 0;
-    int yPos = 0;
-    while (SDL_PollEvent(&mEvent)) {
-        switch (mEvent.type) {
+int main(int argc, char* argv[]) {
+    QApplication app(argc, argv);
 
-        case SDL_QUIT:
-            quit();
-            break;
+    QWidget mainWindow;
 
-        case SDL_KEYDOWN:
-            switch (mEvent.key.keysym.sym) {
-            case SDLK_a:
-                mCamera->setXVelocity(-0.01f);
-                break;
-            case SDLK_d:
-                mCamera->setXVelocity(0.01f);
-                break;
-            case SDLK_s:
-                mCamera->setZVelocity(-0.01f);
-                break;
-            case SDLK_w:
-                mCamera->setZVelocity(0.01f);
-                break;
-            case SDLK_ESCAPE:
-                quit();
-                break;
-            default:
-                break;
-            }
-            break;
+    QGLFormat format;
+    format.setVersion(4,0);
+    format.setProfile(QGLFormat::CoreProfile);
 
-        case SDL_KEYUP:
-            switch(mEvent.key.keysym.sym) {
-            case SDLK_a:
-                if (mCamera->movingLeft())
-                    mCamera->setXVelocity(0.0f);
-                break;
-            case SDLK_d:
-                if (mCamera->movingRight())
-                    mCamera->setXVelocity(0.0f);
-                break;
-            case SDLK_w:
-                if (mCamera->movingForward())
-                    mCamera->setZVelocity(0.0f);
-                break;
-            case SDLK_s:
-                if (mCamera->movingBackward())
-                    mCamera->setZVelocity(0.0f);
-                break;
-            default:
-                break;
-            }
-            break;
+    Renderer renderer(format, &mainWindow);
 
-        case SDL_MOUSEMOTION:
-            // get current mouse cursor position
-            SDL_GetMouseState(&xPos, &yPos);
+    mainWindow.show();
 
-            // rotate left
-            if (xPos < mOldMousePos.x) {
-                mCamera->incXRotation(0.5f);
-            }
-            // rotate right
-            if (xPos > mOldMousePos.x) {
-                mCamera->incXRotation(-0.5f);
-            }
-            // rotate up
-            if (yPos < mOldMousePos.y) {
-                mCamera->incYRotation(0.5f);
-            }
-            // rotate down
-            if (yPos > mOldMousePos.y) {
-                mCamera->incYRotation(-0.5f);
-            }
-
-            // save mouse cursor position
-            mOldMousePos.x = xPos;
-            mOldMousePos.y = yPos;
-            break;
-
-        default:
-            break;
-        }
-    }
-}
-
-void Renderer::mainLoop() {
-    while(true) {
-        handleInput();
-        drawScreen();
-    }
-}
-
-
-int main() {
-    Renderer renderer;
-    renderer.init();
-    renderer.mainLoop();
-
-    return 0;
+    return app.exec();
 }

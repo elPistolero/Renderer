@@ -9,11 +9,12 @@
 #define RENDERER_H_
 
 #include "GL/glew.h"
+#include <QApplication>
+#include <QGLWidget>
 #include "ProjectWideHeaders.h"
 #include "SceneGraph/SceneGraph.h"
 #include "GLSLProgram/GLSLProgram.hpp"
 #include "Importer/OBJImporter.h"
-#include "SDL/SDL.h"
 
 #define BUFFER_OFFSET(i) ((char*)NULL + (i))
 
@@ -23,17 +24,19 @@ const int BITSPERPIXEL = 32;
 
 using namespace Scene;
 
-class Renderer {
+class Renderer : public QGLWidget {
+Q_OBJECT
+
 public:
-Renderer();
-virtual ~Renderer();
-bool init();
-void quit();
-void drawScreen();
-void mainLoop();
+Renderer(const QGLFormat& format, QWidget* parent);
+~Renderer();
+
+protected:
+void initializeGL();
+void paintGL();
+void resizeGL(int w, int h);
 
 private:
-SDL_Event mEvent;
 glm::mat4 mProjection;
 glm::vec2 mOldMousePos;
 SceneGraph* mGraph;
