@@ -1,5 +1,5 @@
 PROJECT (Renderer)
-CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
+CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 
 SET(RENDERER_SRCS Renderer.cpp Importer/OBJImporter.cpp GLSLProgram/GLSLProgram.cpp
     SceneGraph/SceneGraph.cpp SceneGraph/SceneCamera.cpp SceneGraph/SceneNode.cpp
@@ -9,6 +9,9 @@ SET(RENDERER_MOC_HDRS Renderer.h Importer/OBJImporter.h GLSLProgram/GLSLProgram.
     SceneGraph/SceneNodeTriangleMesh.h)
 SET(RENDERER_UIS )
 SET(RENDERER_RCS )
+
+FILE(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Shader DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+FILE(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_DEFINITIONS(-Wall)
 
