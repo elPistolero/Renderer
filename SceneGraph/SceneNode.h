@@ -23,11 +23,12 @@ void attachNode(SceneNode& child);
 void detachNode(SceneNode& child);
 void deleteNode(SceneNode& child);
 std::list<SceneNode*>& getChildren();
-void setLocalTransformation(const glm::mat4& trans);
-glm::mat4& getLocalTransformation();
-void setGlobalTransformation(const glm::mat4& trans);
-glm::mat4& getGlobalTransformation();
+void setTransformation(const glm::mat4& trans);
+glm::mat4& getTransformation();
 glm::mat3& getNormalMatrix();
+void rotate(const glm::vec3& axis, float degrees);
+void translate(const glm::vec3& trans);
+void scale(const glm::vec3& scale);
 void virtual update();
 
 friend std::ostream& operator<< (std::ostream& out, const SceneNode& node);
@@ -35,12 +36,13 @@ friend std::ostream& operator<< (std::ostream& out, const SceneNode& node);
 protected:
 SceneNode* mParent;
 std::list<SceneNode*> mChildren;
-glm::mat4 mGlobalTransformation;
-glm::mat4 mLocalTransformation;
+glm::mat4 mTransformation;
 glm::mat3 mNormalMatrix;
 bool mUpdated;
 
 private:
+glm::mat4 mLocalTransformation;
+
 void setNormalMatrix();
 };
 

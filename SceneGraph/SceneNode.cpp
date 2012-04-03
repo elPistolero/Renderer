@@ -10,7 +10,7 @@
 namespace Scene {
 
 SceneNode::SceneNode()
-    : mParent(0), mChildren(0), mGlobalTransformation(1.0f), mLocalTransformation(1.0f), mUpdated(false) {
+    : mParent(0), mChildren(0), mTransformation(1.0f), mUpdated(false), mLocalTransformation(1.0f) {
 }
 
 SceneNode::~SceneNode() {
@@ -31,7 +31,7 @@ void SceneNode::detachNode(SceneNode& child) {
         }
     }
     child.mParent = 0;
-    child.mGlobalTransformation = glm::mat4(1);
+    child.mTransformation = glm::mat4(1);
 }
 
 void SceneNode::attachNode(SceneNode& child) {
@@ -55,46 +55,52 @@ std::list<SceneNode*>& SceneNode::getChildren() {
     return mChildren;
 }
 
-void SceneNode::setLocalTransformation(const glm::mat4& trans) {
-    mLocalTransformation = trans;
-    mUpdated = false;
-}
-
-glm::mat4& SceneNode::getLocalTransformation() {
-    return mLocalTransformation;
-}
-
-void SceneNode::setGlobalTransformation(const glm::mat4& trans) {
-    mGlobalTransformation = trans;
+void SceneNode::setTransformation(const glm::mat4& trans) {
+    mTransformation = trans;
     setNormalMatrix();
     mUpdated = false;
 }
 
-glm::mat4& SceneNode::getGlobalTransformation() {
-    return mGlobalTransformation;
+glm::mat4& SceneNode::getTransformation() {
+    return mTransformation;
 }
 
 void SceneNode::setNormalMatrix() {
-    mNormalMatrix = glm::inverseTranspose(glm::mat3(mGlobalTransformation));
+    mNormalMatrix = glm::inverseTranspose(glm::mat3(mTransformation));
 }
 
 glm::mat3& SceneNode::getNormalMatrix() {
     return mNormalMatrix;
 }
 
+void SceneNode::rotate(const glm::vec3& axis, float degrees) {
+    mLocalTransformation = mLocalTransformation * glm::rotate(glm::mat4(1.0f), degrees, axis);
+    mUpdated = false;
+}
+
+void SceneNode::translate(const glm::vec3& trans) {
+    mLocalTransformation = mLocalTransformation * glm::translate(glm::mat4(1.0f), trans);
+    mUpdated = false;
+}
+
+void SceneNode::scale(const glm::vec3& scale) {
+    mLocalTransformation = mLocalTransformation * glm::scale(glm::mat4(1.0f), scale);
+    mUpdated = false;
+}
+
 void SceneNode::update() {
     // if not up to date update from parent
     if (!mUpdated) {
-        // update from parent only if we are not the root
         if (mParent)
-            mGlobalTransformation = mParent->getGlobalTransformation() * mLocalTransformation;
+            mTransformation = mParent->getTransformation() * mLocalTransformation;
+
+        setNormalMatrix();
 
         // update possible children
         if (!mChildren.empty()) {
             std::list<SceneNode*>::iterator it;
             for (it = mChildren.begin(); it != mChildren.end(); ++it) {
-                if (!mUpdated)
-                    (*it)->mUpdated = false;
+                (*it)->mUpdated = false;
                 (*it)->update();
             }
         }
@@ -120,10 +126,10 @@ std::ostream& operator<< (std::ostream& out, const SceneNode& node) {
         out << "parent: 0\n";
     out << "children: " << node.mChildren.size() << std::endl;
     out << "updated: " << node.mUpdated << std::endl;
-    out << "[" << node.mGlobalTransformation[0][0] << ", " << node.mGlobalTransformation[0][1] << ", " << node.mGlobalTransformation[0][2] << ", " << node.mGlobalTransformation[0][3] << "]\n";
-    out << "[" << node.mGlobalTransformation[1][0] << ", " << node.mGlobalTransformation[1][1] << ", " << node.mGlobalTransformation[1][2] << ", " << node.mGlobalTransformation[1][3] << "]\n";
-    out << "[" << node.mGlobalTransformation[2][0] << ", " << node.mGlobalTransformation[2][1] << ", " << node.mGlobalTransformation[2][2] << ", " << node.mGlobalTransformation[2][3] << "]\n";
-    out << "[" << node.mGlobalTransformation[3][0] << ", " << node.mGlobalTransformation[3][1] << ", " << node.mGlobalTransformation[3][2] << ", " << node.mGlobalTransformation[3][3] << "]\n";
+    out << "[" << node.mTransformation[0][0] << ", " << node.mTransformation[0][1] << ", " << node.mTransformation[0][2] << ", " << node.mTransformation[0][3] << "]\n";
+    out << "[" << node.mTransformation[1][0] << ", " << node.mTransformation[1][1] << ", " << node.mTransformation[1][2] << ", " << node.mTransformation[1][3] << "]\n";
+    out << "[" << node.mTransformation[2][0] << ", " << node.mTransformation[2][1] << ", " << node.mTransformation[2][2] << ", " << node.mTransformation[2][3] << "]\n";
+    out << "[" << node.mTransformation[3][0] << ", " << node.mTransformation[3][1] << ", " << node.mTransformation[3][2] << ", " << node.mTransformation[3][3] << "]\n";
 
     return out;
 }

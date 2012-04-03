@@ -9,10 +9,21 @@
 
 using namespace Scene;
 
-Renderer::Renderer(const QGLFormat& format, QWidget* parent) : QGLWidget(format, parent), mProjection(1.0), mOldMousePos(WIDTH/2,HEIGHT/2), mGraph(0), mCamera(0), mSimpleShader(0) {
+Renderer::Renderer(const QGLFormat& format, QWidget* parent) :
+    QGLWidget(format, parent),
+    mProjection(1.0),
+    mOldMousePos(WIDTH/2,HEIGHT/2),
+    mGraph(0),
+    mCamera(0),
+    mSimpleShader(0),
+    mMouseTracking(false),
+    mWidth(800),
+    mHeight(600) {
     mGraph = new SceneGraph();
     mCamera = mGraph->getRoot();
-    this->setMinimumSize(800,600);
+    this->setMinimumSize(mWidth, mHeight);
+
+    this->setMouseTracking(true);
 }
 
 Renderer::~Renderer() {
@@ -136,6 +147,8 @@ void Renderer::initVAO(GLint vertexLoc, GLint vertexNormalLoc, GLint texCoordLoc
 }
 
 void Renderer::resizeGL(int w, int h) {
+    mWidth = w;
+    mHeight = h;
     mProjection = glm::perspective(60.0f, (float)WIDTH/(float)HEIGHT, 1.0f, 1000.0f);
 }
 
@@ -151,11 +164,11 @@ void Renderer::paintGL() {
     for (it = children.begin(); it != children.end(); ++it) {
         SceneNodeTriangleMesh* triMesh = dynamic_cast<SceneNodeTriangleMesh*>(*it);
         if (triMesh) {
-            mSimpleShader->setUniform("modelview", triMesh->getGlobalTransformation());
+            mSimpleShader->setUniform("modelview", triMesh->getTransformation());
             //shader.setUniform("projection", mProjection);
-            mSimpleShader->setUniform("mvp", mProjection * triMesh->getGlobalTransformation());
+            mSimpleShader->setUniform("mvp", mProjection * triMesh->getTransformation());
             mSimpleShader->setUniform("normalMatrix", triMesh->getNormalMatrix());
-            glm::vec4 worldLight = mCamera->getGlobalTransformation() * glm::vec4(5.0f, 5.0f, 2.0f, 1.0f);
+            glm::vec4 worldLight = mCamera->getTransformation() * glm::vec4(5.0f, 5.0f, 2.0f, 1.0f);
             mSimpleShader->setUniform("lightPosition", worldLight);
             glBindVertexArray(triMesh->getVAOPointer());
             glDrawElements(GL_TRIANGLES, triMesh->getNumberOfFaces()*3, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
@@ -165,6 +178,71 @@ void Renderer::paintGL() {
     glUseProgram(0);
 
     glFinish();
+}
+
+void Renderer::mousePressEvent(QMouseEvent* event) {
+    if (event->button() == Qt::LeftButton) {
+        QPoint pos = event->pos();
+        mMouseTracking = true;
+        mOldMousePos.x = pos.x();
+        mOldMousePos.y = pos.y();
+    }
+}
+
+void Renderer::mouseReleaseEvent(QMouseEvent* event) {
+    if (event->button() == Qt::LeftButton)
+        mMouseTracking = false;
+}
+
+void Renderer::mouseMoveEvent(QMouseEvent* event) {
+    QPoint pos = event->pos();
+    if (mMouseTracking) {
+        if (mOldMousePos.x != pos.x() || mOldMousePos.y != pos.y()) {
+            float x1 = mOldMousePos.x - (mWidth / 2.0f);
+            float y1 = mOldMousePos.y - (mHeight / 2.0f);
+            float x2 = (x1 * glm::sqrt(2) / mWidth);
+            float y2 = (y1 * glm::sqrt(2) / mHeight);
+
+            glm::vec3 P1(x2, y2, glm::sqrt(1 - x2 * x2 - y2 * y2));
+
+            x1 = pos.x() - (mWidth / 2.0f);
+            y1 = pos.y() - (mHeight / 2.0f);
+            x2 = (x1 * glm::sqrt(2) / mWidth);
+            y2 = (y1 * glm::sqrt(2) / mHeight);
+
+            glm::vec3 P2(x2, y2, glm::sqrt(1 - x2 * x2 - y2 * y2));
+
+            glm::vec3 rotAxis = glm::cross(P1, P2);
+
+            float cosAngle = glm::dot(P1, P2)/(glm::length(P1)*glm::length(P2));
+            float rotAngle = glm::acos(cosAngle);
+
+            std::list<SceneNode*> children = mCamera->getChildren();
+            std::list<SceneNode*>::iterator it;
+            for (it = children.begin(); it != children.end(); ++it) {
+                (*it)->rotate(rotAxis, 2.0f*glm::degrees(rotAngle));
+            }
+
+            mOldMousePos.x = pos.x();
+            mOldMousePos.y = pos.y();
+
+            updateGL();
+        }
+    }
+}
+
+void Renderer::wheelEvent(QWheelEvent* event) {
+    std::list<SceneNode*> children = mCamera->getChildren();
+    std::list<SceneNode*>::iterator it;
+    for (it = children.begin(); it != children.end(); ++it) {
+        if (event->delta() > 0)
+            (*it)->scale(glm::vec3(1.05f));
+        else
+            (*it)->scale(glm::vec3(0.95f));
+    }
+
+    updateGL();
+    event->accept();
 }
 
 int main(int argc, char* argv[]) {
