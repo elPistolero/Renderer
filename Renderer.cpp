@@ -194,37 +194,52 @@ void Renderer::mouseReleaseEvent(QMouseEvent* event) {
         mMouseTracking = false;
 }
 
+bool Renderer::mapToSphere(glm::vec2& point, glm::vec3& vec) {
+    if ((point.x >= 0) && (point.x <= mWidth) &&
+        (point.y >= 0) && (point.y <= mHeight)) {
+        float x = (point.x - 0.5f*mWidth) / mWidth;
+        float y = (point.y - 0.5f*mHeight) / mHeight;
+        float sinx = glm::sin(x*M_PI*0.5);
+        float siny = glm::sin(y*M_PI*0.5);
+        float sinx2siny2 = sinx*sinx + siny*siny;
+
+        vec.x = sinx;
+        vec.y = siny;
+        vec.z = sinx2siny2 < 1.0f ? sqrt(1.0f - sinx2siny2) : 0.0f;
+
+        return true;
+    } else {
+        return false;
+    }
+}
+
 void Renderer::mouseMoveEvent(QMouseEvent* event) {
-    QPoint pos = event->pos();
+    glm::vec2 currentMousePos(event->pos().x(), event->pos().y());
     if (mMouseTracking) {
-        if (mOldMousePos.x != pos.x() || mOldMousePos.y != pos.y()) {
-            float x1 = mOldMousePos.x - (mWidth / 2.0f);
-            float y1 = mOldMousePos.y - (mHeight / 2.0f);
-            float x2 = (x1 * glm::sqrt(2) / mWidth);
-            float y2 = (y1 * glm::sqrt(2) / mHeight);
+        if (mOldMousePos.x != currentMousePos.x || mOldMousePos.y != currentMousePos.y) {
+            glm::vec3 P1;
+            glm::vec3 P2;
 
-            glm::vec3 P1(x2, y2, glm::sqrt(1 - x2 * x2 - y2 * y2));
+            bool oldMapped = mapToSphere(mOldMousePos, P1);
+            bool newMapped = mapToSphere(currentMousePos, P2);
 
-            x1 = pos.x() - (mWidth / 2.0f);
-            y1 = pos.y() - (mHeight / 2.0f);
-            x2 = (x1 * glm::sqrt(2) / mWidth);
-            y2 = (y1 * glm::sqrt(2) / mHeight);
+            if (oldMapped && newMapped) {
+                glm::vec3 rotAxis = glm::cross(P1, P2);
+                float cosAngle = glm::dot(P1, P2);
 
-            glm::vec3 P2(x2, y2, glm::sqrt(1 - x2 * x2 - y2 * y2));
+                if (fabsf(cosAngle) < 1.0f) {
+                    float rotAngle = 2.0f*glm::acos(cosAngle);
 
-            glm::vec3 rotAxis = glm::cross(P1, P2);
-
-            float cosAngle = glm::dot(P1, P2)/(glm::length(P1)*glm::length(P2));
-            float rotAngle = glm::acos(cosAngle);
-
-            std::list<SceneNode*> children = mCamera->getChildren();
-            std::list<SceneNode*>::iterator it;
-            for (it = children.begin(); it != children.end(); ++it) {
-                (*it)->rotate(rotAxis, 2.0f*glm::degrees(rotAngle));
+                    std::list<SceneNode*> children = mCamera->getChildren();
+                    std::list<SceneNode*>::iterator it;
+                    for (it = children.begin(); it != children.end(); ++it) {
+                        (*it)->rotate(rotAxis, glm::degrees(rotAngle));
+                    }
+                }
             }
 
-            mOldMousePos.x = pos.x();
-            mOldMousePos.y = pos.y();
+            mOldMousePos.x = currentMousePos.x;
+            mOldMousePos.y = currentMousePos.y;
 
             updateGL();
         }

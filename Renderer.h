@@ -41,6 +41,7 @@ void mousePressEvent(QMouseEvent* event);
 void mouseMoveEvent(QMouseEvent* event);
 void mouseReleaseEvent(QMouseEvent* event);
 void wheelEvent(QWheelEvent* event);
+bool mapToSphere(glm::vec2& point, glm::vec3& vec);
 
 private:
 glm::mat4 mProjection;
