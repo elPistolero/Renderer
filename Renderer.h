@@ -37,6 +37,7 @@ protected:
 void initializeGL();
 void paintGL();
 void resizeGL(int w, int h);
+void checkGLErrors(const char* file, int line);
 void mousePressEvent(QMouseEvent* event);
 void mouseMoveEvent(QMouseEvent* event);
 void mouseReleaseEvent(QMouseEvent* event);
@@ -49,7 +50,8 @@ glm::vec2 mOldMousePos;
 SceneGraph* mGraph;
 SceneCamera* mCamera;
 Shader::GLSLProgram* mSimpleShader;
-bool mMouseTracking;
+bool mMouseTrackingLeft;
+bool mMouseTrackingRight;
 int mWidth;
 int mHeight;
 
