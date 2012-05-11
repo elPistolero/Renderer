@@ -74,17 +74,17 @@ glm::mat3& SceneNode::getNormalMatrix() {
 }
 
 void SceneNode::rotate(const glm::vec3& axis, float degrees) {
-    mLocalTransformation = mLocalTransformation * glm::rotate(glm::mat4(1.0f), degrees, axis);
+    mLocalTransformation = glm::rotate(glm::mat4(1.0f), degrees, axis) * mLocalTransformation;
     mUpdated = false;
 }
 
 void SceneNode::translate(const glm::vec3& trans) {
-    mLocalTransformation = mLocalTransformation * glm::translate(glm::mat4(1.0f), trans);
+    mLocalTransformation = glm::translate(glm::mat4(1.0f), trans) * mLocalTransformation;
     mUpdated = false;
 }
 
 void SceneNode::scale(const glm::vec3& scale) {
-    mLocalTransformation = mLocalTransformation * glm::scale(glm::mat4(1.0f), scale);
+    mLocalTransformation = glm::scale(glm::mat4(1.0f), scale) * mLocalTransformation;
     mUpdated = false;
 }
 

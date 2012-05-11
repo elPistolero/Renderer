@@ -94,8 +94,8 @@ void Renderer::initVAO(GLint vertexLoc, GLint vertexNormalLoc, GLint texCoordLoc
     std::vector<GLfloat> vnbo;
     std::vector<GLfloat> vtbo;
     std::vector<GLuint> ibo;
-    //objReader.readFile("./Resources/test.obj", vbo, vnbo, vtbo, ibo);
-    objReader.readFile("./Resources/bunny.obj", vbo, vnbo, vtbo, ibo);
+    objReader.readFile("./Resources/test.obj", vbo, vnbo, vtbo, ibo);
+    //objReader.readFile("./Resources/bunny.obj", vbo, vnbo, vtbo, ibo);
 
     std::vector<GLfloat>::iterator vIt;
     for (vIt = vbo.begin(); vIt != vbo.end(); ++vIt) {
